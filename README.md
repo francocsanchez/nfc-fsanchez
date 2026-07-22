@@ -7,9 +7,7 @@ Plataforma de perfiles NFC construida con Next.js 16, App Router y MongoDB.
 Variables base:
 
 ```env
-MONGODB_URI=mongodb://localhost:27017
-DATABASE_MONGO=mongodb://localhost:27017
-MONGODB_DB_NAME=nfc_fsanchez
+DATABASE_MONGO=mongodb://localhost:27017/nfc_fsanchez
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
@@ -31,8 +29,7 @@ Build local:
 ```bash
 docker build -t nfc-fsanchez:local .
 docker run --rm -p 3000:3000 ^
-  -e DATABASE_MONGO=mongodb://host.docker.internal:27017 ^
-  -e MONGODB_DB_NAME=nfc_fsanchez ^
+  -e DATABASE_MONGO=mongodb://host.docker.internal:27017/nfc_fsanchez ^
   -e NEXT_PUBLIC_APP_URL=http://localhost:3000 ^
   nfc-fsanchez:local
 ```
@@ -56,19 +53,16 @@ Se incluye [docker-compose.yml](./docker-compose.yml) listo para usar como stack
 Variables recomendadas para el stack:
 
 ```env
-GHCR_OWNER=francocsanchez
-IMAGE_TAG=latest
 APP_PORT=3000
-DATABASE_MONGO=mongodb://mongo:27017
-MONGODB_DB_NAME=nfc_fsanchez
+DATABASE_MONGO=mongodb://admin:TU_PASSWORD@192.168.100.31:27017/nfc-fsanchez?authSource=admin
 NEXT_PUBLIC_APP_URL=https://nfc.tu-dominio.com
 ```
 
 Notas:
 
 - Si el paquete de GHCR queda privado, Portainer necesita credenciales de registry con permiso de lectura.
-- Si quieres usar un Mongo externo, cambia `DATABASE_MONGO` y puedes quitar el servicio `mongo` del stack.
-- El volumen `nfc-fsanchez-mongo-data` persiste la base entre reinicios.
+- El stack esta pensado para Mongo externo, igual que `intraNIC`: Portainer solo levanta la app y le inyecta `DATABASE_MONGO`.
+- La URI debe incluir el nombre de la base en la ruta, por ejemplo `mongodb://usuario:password@host:27017/nfc-fsanchez?authSource=admin`.
 
 ## GitHub Actions
 

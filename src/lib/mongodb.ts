@@ -6,11 +6,8 @@ declare global {
   var __mongoClientPromise__: Promise<MongoClient> | undefined;
 }
 
-function getRequiredEnv(name: "MONGODB_URI" | "MONGODB_DB_NAME") {
-  const value =
-    name === "MONGODB_URI"
-      ? process.env.MONGODB_URI ?? process.env.DATABASE_MONGO
-      : process.env.MONGODB_DB_NAME;
+function getRequiredEnv(name: "DATABASE_MONGO") {
+  const value = process.env[name];
 
   if (!value) {
     throw new Error(`Missing required environment variable: ${name}`);
@@ -19,9 +16,22 @@ function getRequiredEnv(name: "MONGODB_URI" | "MONGODB_DB_NAME") {
   return value;
 }
 
+function getDatabaseNameFromUri(uri: string) {
+  const parsed = new URL(uri);
+  const dbName = parsed.pathname.replace(/^\/+/, "");
+
+  if (!dbName) {
+    throw new Error(
+      "DATABASE_MONGO must include a database name in the connection string path.",
+    );
+  }
+
+  return dbName;
+}
+
 export async function getDatabase(): Promise<Db> {
-  const uri = getRequiredEnv("MONGODB_URI");
-  const dbName = getRequiredEnv("MONGODB_DB_NAME");
+  const uri = getRequiredEnv("DATABASE_MONGO");
+  const dbName = getDatabaseNameFromUri(uri);
 
   const clientPromise =
     global.__mongoClientPromise__ ?? new MongoClient(uri).connect();
