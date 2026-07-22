@@ -28,6 +28,12 @@ Current project structure:
 - `src/components`: shared UI and client components
 - `src/lib`: MongoDB access, profile domain logic, schemas, helpers
 
+Current profile data model:
+
+- Required: `name`, `email`
+- Optional but normalized to empty strings: `jobTitle`, `address`, `googleMapsUrl`, `whatsapp`
+- System fields: `slug`, `isActive`, `createdAt`, `updatedAt`
+
 # Working Conventions
 
 - Keep App Router code inside `src/app`.
@@ -36,6 +42,23 @@ Current project structure:
 - Reuse the profile service layer in `src/lib/profiles.ts` instead of duplicating MongoDB queries in route files or components.
 - Preserve the current slug invariant: slugs are generated once and must stay stable so existing NFC tags do not break.
 - Preserve the current visibility invariant: inactive profiles should not resolve publicly.
+- Keep profile serialization backward-safe: optional string fields should continue to serialize as `""`, not `null` or `undefined`.
+- Keep WhatsApp handling compatible with the current public page flow: the stored value is local digits only, while the public page builds the `wa.me/549...` URL.
+- Keep Google Maps validation aligned with the current schema: only Google Maps style URLs are accepted when the field is present.
+- Do not reintroduce the removed `landingUrl` field in new code. Some cleanup still exists in `src/lib/profiles.ts` only for legacy persisted records.
+- Prefer server components for route pages unless client interactivity is actually needed.
+- When editing dynamic route files on Windows, use literal paths for bracketed folders if shell commands need them, for example `-LiteralPath 'src/app/[slug]/page.tsx'`.
+
+# Environment
+
+- MongoDB config supports either `DATABASE_MONGO` or the pair `MONGODB_URI` plus `MONGODB_DB_NAME`.
+- Public URL generation depends on `NEXT_PUBLIC_APP_URL`.
+- `BETTER_AUTH_SECRET` is present in env scaffolding, but auth is not yet wired into the current admin flow.
+
+# UI Notes
+
+- The public profile page is mobile-first and intentionally more brand-forward than the admin area.
+- The admin surface is a CRUD tool; favor clarity and speed over decorative UI changes there.
 
 # Commands
 
