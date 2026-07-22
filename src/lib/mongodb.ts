@@ -6,16 +6,6 @@ declare global {
   var __mongoClientPromise__: Promise<MongoClient> | undefined;
 }
 
-function getRequiredEnv(name: "DATABASE_MONGO") {
-  const value = process.env[name];
-
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
-  }
-
-  return value;
-}
-
 function getDatabaseNameFromUri(uri: string) {
   const parsed = new URL(uri);
   const dbName = parsed.pathname.replace(/^\/+/, "");
@@ -29,9 +19,33 @@ function getDatabaseNameFromUri(uri: string) {
   return dbName;
 }
 
-export async function getDatabase(): Promise<Db> {
-  const uri = getRequiredEnv("DATABASE_MONGO");
-  const dbName = getDatabaseNameFromUri(uri);
+function getMongoConfig() {
+  const directUri = process.env.DATABASE_MONGO;
+
+  if (directUri) {
+    return {
+      uri: directUri,
+      dbName: getDatabaseNameFromUri(directUri),
+    };
+  }
+
+  const mongoUri = process.env.MONGODB_URI;
+  const dbName = process.env.MONGODB_DB_NAME;
+
+  if (mongoUri && dbName) {
+    return {
+      uri: mongoUri,
+      dbName,
+    };
+  }
+
+  throw new Error(
+    "Missing MongoDB configuration. Set DATABASE_MONGO or MONGODB_URI with MONGODB_DB_NAME.",
+  );
+}
+
+export function getMongoClient(): Promise<MongoClient> {
+  const { uri } = getMongoConfig();
 
   const clientPromise =
     global.__mongoClientPromise__ ?? new MongoClient(uri).connect();
@@ -40,7 +54,12 @@ export async function getDatabase(): Promise<Db> {
     global.__mongoClientPromise__ = clientPromise;
   }
 
-  const client = await clientPromise;
+  return clientPromise;
+}
+
+export async function getDatabase(): Promise<Db> {
+  const { dbName } = getMongoConfig();
+  const client = await getMongoClient();
 
   return client.db(dbName);
 }

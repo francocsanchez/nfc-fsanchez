@@ -9,6 +9,7 @@ Variables base:
 ```env
 DATABASE_MONGO=mongodb://localhost:27017/nfc_fsanchez
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+BETTER_AUTH_SECRET=replace-with-a-random-secret-of-32-chars-or-more
 ```
 
 Comandos:
@@ -31,6 +32,7 @@ docker build -t nfc-fsanchez:local .
 docker run --rm -p 3000:3000 ^
   -e DATABASE_MONGO=mongodb://host.docker.internal:27017/nfc_fsanchez ^
   -e NEXT_PUBLIC_APP_URL=http://localhost:3000 ^
+  -e BETTER_AUTH_SECRET=replace-with-a-random-secret-of-32-chars-or-more ^
   nfc-fsanchez:local
 ```
 
@@ -55,7 +57,17 @@ Variables recomendadas para el stack:
 ```env
 DATABASE_MONGO=mongodb://admin:TU_PASSWORD@192.168.100.31:27017/nfc-fsanchez?authSource=admin
 NEXT_PUBLIC_APP_URL=https://nfc.tu-dominio.com
+BETTER_AUTH_SECRET=genera-un-secreto-largo-y-aleatorio
 ```
+
+## Auth de admin
+
+Las rutas bajo `/admin` ahora usan Better Auth con email y contrasena.
+
+- El login vive en `/login`.
+- `src/proxy.ts` redirige a `/login` cuando no hay sesion valida.
+- `src/app/admin/layout.tsx` y las APIs de administracion vuelven a validar la sesion en servidor.
+- Better Auth usa MongoDB para persistir usuarios, cuentas y sesiones.
 
 Notas:
 

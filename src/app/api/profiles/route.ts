@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { getSessionFromHeaders } from "@/lib/auth-session";
 import {
   createProfile,
   DuplicateSlugError,
@@ -7,7 +8,15 @@ import {
   listProfiles,
 } from "@/lib/profiles";
 
-export async function GET() {
+function createUnauthorizedResponse() {
+  return Response.json({ error: "No autorizado." }, { status: 401 });
+}
+
+export async function GET(request: Request) {
+  if (!(await getSessionFromHeaders(request.headers))) {
+    return createUnauthorizedResponse();
+  }
+
   try {
     const profiles = await listProfiles();
 
@@ -23,6 +32,10 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (!(await getSessionFromHeaders(request.headers))) {
+    return createUnauthorizedResponse();
+  }
+
   try {
     const body = await request.json();
     const profile = await createProfile(body);

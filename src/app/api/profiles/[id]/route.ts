@@ -1,15 +1,24 @@
 import { z } from "zod";
 
+import { getSessionFromHeaders } from "@/lib/auth-session";
 import {
   formatZodError,
   getProfileById,
   updateProfile,
 } from "@/lib/profiles";
 
+function createUnauthorizedResponse() {
+  return Response.json({ error: "No autorizado." }, { status: 401 });
+}
+
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  if (!(await getSessionFromHeaders(request.headers))) {
+    return createUnauthorizedResponse();
+  }
+
   try {
     const { id } = await params;
     const profile = await getProfileById(id);
@@ -36,6 +45,10 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  if (!(await getSessionFromHeaders(request.headers))) {
+    return createUnauthorizedResponse();
+  }
+
   try {
     const { id } = await params;
     const body = await request.json();

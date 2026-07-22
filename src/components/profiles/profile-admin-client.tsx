@@ -29,6 +29,12 @@ type ApiErrorResponse = {
   fieldErrors?: FieldErrors;
 };
 
+type ChangePasswordValues = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
+
 type FormValues = {
   name: string;
   jobTitle: string;
@@ -47,6 +53,12 @@ const emptyValues: FormValues = {
   email: "",
   whatsapp: "",
   isActive: true,
+};
+
+const emptyPasswordValues: ChangePasswordValues = {
+  currentPassword: "",
+  newPassword: "",
+  confirmPassword: "",
 };
 
 function getErrorMessage(error: unknown) {
@@ -87,41 +99,42 @@ function ProfileModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-black/50 p-0 sm:items-center sm:justify-center sm:p-6">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-0 sm:p-6">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="profile-modal-title"
-        className="w-full rounded-t-3xl border border-border bg-background p-5 shadow-2xl sm:max-w-4xl sm:rounded-3xl sm:p-6"
+        className="mt-auto w-full rounded-t-3xl border border-border bg-background p-5 shadow-2xl sm:mx-auto sm:my-auto sm:max-w-4xl sm:rounded-3xl sm:p-6"
       >
-        <div className="mb-5 flex items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">
-              {mode === "create" ? "Nuevo perfil" : "Editar perfil"}
-            </p>
-            <h2 id="profile-modal-title" className="text-xl font-semibold">
-              {mode === "create"
-                ? "Crear perfil NFC"
-                : "Actualizar perfil existente"}
-            </h2>
+        <div className="flex max-h-[100dvh] flex-col sm:max-h-[calc(100dvh-3rem)]">
+          <div className="mb-5 flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                {mode === "create" ? "Nuevo perfil" : "Editar perfil"}
+              </p>
+              <h2 id="profile-modal-title" className="text-xl font-semibold">
+                {mode === "create"
+                  ? "Crear perfil NFC"
+                  : "Actualizar perfil existente"}
+              </h2>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={onClose}
+              disabled={submitting}
+            >
+              <span className="sr-only">Cerrar modal</span>x
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={onClose}
-            disabled={submitting}
-          >
-            <span className="sr-only">Cerrar modal</span>x
-          </Button>
-        </div>
 
-        <form
-          className="space-y-5"
-          onSubmit={(event) => {
-            event.preventDefault();
-            onSubmit();
-          }}
-        >
+          <form
+            className="space-y-5 overflow-y-auto pr-1"
+            onSubmit={(event) => {
+              event.preventDefault();
+              onSubmit();
+            }}
+          >
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             <div className="space-y-1.5">
               <label htmlFor="profile-name" className="text-sm font-medium">
@@ -314,7 +327,142 @@ function ProfileModal({
                   : "Guardar cambios"}
             </Button>
           </div>
-        </form>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChangePasswordModal({
+  open,
+  values,
+  submitting,
+  submitError,
+  onChange,
+  onClose,
+  onSubmit,
+}: {
+  open: boolean;
+  values: ChangePasswordValues;
+  submitting: boolean;
+  submitError: string | null;
+  onChange: (field: keyof ChangePasswordValues, value: string) => void;
+  onClose: () => void;
+  onSubmit: () => void;
+}) {
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-0 sm:p-6">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="password-modal-title"
+        className="mt-auto w-full rounded-t-3xl border border-border bg-background p-5 shadow-2xl sm:mx-auto sm:my-auto sm:max-w-lg sm:rounded-3xl sm:p-6"
+      >
+        <div className="flex max-h-[100dvh] flex-col sm:max-h-[calc(100dvh-3rem)]">
+          <div className="mb-5 flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Seguridad
+              </p>
+              <h2 id="password-modal-title" className="text-xl font-semibold">
+                Cambiar contrasena
+              </h2>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={onClose}
+              disabled={submitting}
+            >
+              <span className="sr-only">Cerrar modal</span>x
+            </Button>
+          </div>
+
+          <form
+            className="space-y-4 overflow-y-auto pr-1"
+            onSubmit={(event) => {
+              event.preventDefault();
+              onSubmit();
+            }}
+          >
+          <div className="space-y-1.5">
+            <label
+              htmlFor="current-password"
+              className="text-sm font-medium"
+            >
+              Contrasena actual
+            </label>
+            <input
+              id="current-password"
+              type="password"
+              value={values.currentPassword}
+              onChange={(event) =>
+                onChange("currentPassword", event.target.value)
+              }
+              className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+              autoComplete="current-password"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="new-password" className="text-sm font-medium">
+              Nueva contrasena
+            </label>
+            <input
+              id="new-password"
+              type="password"
+              value={values.newPassword}
+              onChange={(event) => onChange("newPassword", event.target.value)}
+              className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+              autoComplete="new-password"
+            />
+            <p className="text-xs text-muted-foreground">
+              Debe tener al menos 8 caracteres.
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="confirm-password" className="text-sm font-medium">
+              Confirmar nueva contrasena
+            </label>
+            <input
+              id="confirm-password"
+              type="password"
+              value={values.confirmPassword}
+              onChange={(event) =>
+                onChange("confirmPassword", event.target.value)
+              }
+              className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+              autoComplete="new-password"
+            />
+          </div>
+
+          {submitError ? (
+            <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {submitError}
+            </div>
+          ) : null}
+
+          <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={onClose}
+              disabled={submitting}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? "Actualizando..." : "Guardar contrasena"}
+            </Button>
+          </div>
+          </form>
+        </div>
       </div>
     </div>
   );
@@ -333,6 +481,11 @@ export function ProfileAdminClient({
   const [submitting, setSubmitting] = useState(false);
   const [listBusyId, setListBusyId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [passwordValues, setPasswordValues] =
+    useState<ChangePasswordValues>(emptyPasswordValues);
+  const [passwordSubmitting, setPasswordSubmitting] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   function openCreateModal() {
     setModalMode("create");
@@ -370,8 +523,30 @@ export function ProfileAdminClient({
     setSubmitError(null);
   }
 
+  function openPasswordModal() {
+    setPasswordValues(emptyPasswordValues);
+    setPasswordError(null);
+    setPasswordModalOpen(true);
+  }
+
+  function closePasswordModal() {
+    if (passwordSubmitting) {
+      return;
+    }
+
+    setPasswordModalOpen(false);
+    setPasswordError(null);
+  }
+
   function updateFormValue(field: keyof FormValues, value: string | boolean) {
     setFormValues((current) => ({ ...current, [field]: value }));
+  }
+
+  function updatePasswordValue(
+    field: keyof ChangePasswordValues,
+    value: string,
+  ) {
+    setPasswordValues((current) => ({ ...current, [field]: value }));
   }
 
   function syncProfiles(nextProfiles: Profile[]) {
@@ -511,6 +686,68 @@ export function ProfileAdminClient({
     }
   }
 
+  async function submitPasswordChange() {
+    setPasswordError(null);
+    setSuccessMessage(null);
+
+    if (!passwordValues.currentPassword || !passwordValues.newPassword) {
+      setPasswordError("Completa la contrasena actual y la nueva.");
+      return;
+    }
+
+    if (passwordValues.newPassword.length < 8) {
+      setPasswordError("La nueva contrasena debe tener al menos 8 caracteres.");
+      return;
+    }
+
+    if (passwordValues.newPassword !== passwordValues.confirmPassword) {
+      setPasswordError("La confirmacion no coincide con la nueva contrasena.");
+      return;
+    }
+
+    setPasswordSubmitting(true);
+
+    try {
+      const response = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          currentPassword: passwordValues.currentPassword,
+          newPassword: passwordValues.newPassword,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as
+          | { message?: string; code?: string }
+          | null;
+
+        if (data?.code === "INVALID_PASSWORD") {
+          setPasswordError("La contrasena actual no es correcta.");
+        } else if (data?.code === "PASSWORD_TOO_SHORT") {
+          setPasswordError("La nueva contrasena debe tener al menos 8 caracteres.");
+        } else if (data?.message) {
+          setPasswordError(data.message);
+        } else {
+          setPasswordError("No se pudo actualizar la contrasena.");
+        }
+
+        return;
+      }
+
+      setPasswordModalOpen(false);
+      setPasswordValues(emptyPasswordValues);
+      setSuccessMessage("Contrasena actualizada correctamente.");
+    } catch (error) {
+      setPasswordError(getErrorMessage(error));
+    } finally {
+      setPasswordSubmitting(false);
+    }
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
       <header className="flex flex-col gap-4 rounded-3xl border border-border bg-card p-5 sm:flex-row sm:items-end sm:justify-between">
@@ -526,9 +763,14 @@ export function ProfileAdminClient({
             </p>
           </div>
         </div>
-        <Button size="lg" onClick={openCreateModal}>
-          Crear perfil
-        </Button>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button variant="outline" size="lg" onClick={openPasswordModal}>
+            Cambiar contrasena
+          </Button>
+          <Button size="lg" onClick={openCreateModal}>
+            Crear perfil
+          </Button>
+        </div>
       </header>
 
       {successMessage ? (
@@ -679,6 +921,15 @@ export function ProfileAdminClient({
         onChange={updateFormValue}
         onClose={closeModal}
         onSubmit={submitProfile}
+      />
+      <ChangePasswordModal
+        open={passwordModalOpen}
+        values={passwordValues}
+        submitting={passwordSubmitting}
+        submitError={passwordError}
+        onChange={updatePasswordValue}
+        onClose={closePasswordModal}
+        onSubmit={submitPasswordChange}
       />
     </div>
   );
