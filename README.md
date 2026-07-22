@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NFC F. Sanchez
 
-## Getting Started
+Plataforma de perfiles NFC construida con Next.js 16, App Router y MongoDB.
 
-First, run the development server:
+## Desarrollo local
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Variables base:
+
+```env
+MONGODB_URI=mongodb://localhost:27017
+DATABASE_MONGO=mongodb://localhost:27017
+MONGODB_DB_NAME=nfc_fsanchez
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Comandos:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm ci
+npm run dev
+npm run build
+npm run lint
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Docker
 
-## Learn More
+El proyecto se construye con `output: "standalone"` para generar una imagen mas chica y lista para produccion.
 
-To learn more about Next.js, take a look at the following resources:
+Build local:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+docker build -t nfc-fsanchez:local .
+docker run --rm -p 3000:3000 ^
+  -e DATABASE_MONGO=mongodb://host.docker.internal:27017 ^
+  -e MONGODB_DB_NAME=nfc_fsanchez ^
+  -e NEXT_PUBLIC_APP_URL=http://localhost:3000 ^
+  nfc-fsanchez:local
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Healthcheck:
 
-## Deploy on Vercel
+```text
+GET /api/health
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Portainer
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Se incluye [docker-compose.yml](./docker-compose.yml) listo para usar como stack en Portainer.
+
+1. Publica el repo en GitHub.
+2. Deja correr la workflow `Build and Publish Docker Image`.
+3. En Portainer crea un stack usando `docker-compose.yml`.
+4. Carga las variables de `.env.portainer.example`.
+5. Despliega el stack.
+
+Variables recomendadas para el stack:
+
+```env
+GHCR_OWNER=francocsanchez
+IMAGE_TAG=latest
+APP_PORT=3000
+DATABASE_MONGO=mongodb://mongo:27017
+MONGODB_DB_NAME=nfc_fsanchez
+NEXT_PUBLIC_APP_URL=https://nfc.tu-dominio.com
+```
+
+Notas:
+
+- Si el paquete de GHCR queda privado, Portainer necesita credenciales de registry con permiso de lectura.
+- Si quieres usar un Mongo externo, cambia `DATABASE_MONGO` y puedes quitar el servicio `mongo` del stack.
+- El volumen `nfc-fsanchez-mongo-data` persiste la base entre reinicios.
+
+## GitHub Actions
+
+La workflow [`.github/workflows/docker-publish.yml`](./.github/workflows/docker-publish.yml) publica la imagen en GHCR:
+
+- Trigger en `push` a `main`
+- Trigger manual con `workflow_dispatch`
+- Tags `latest` y `sha-<commit>`
+
+La imagen publicada queda en:
+
+```text
+ghcr.io/<owner-del-repo>/nfc-fsanchez:latest
+```

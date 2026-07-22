@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  nfc-fsanchez:
+    container_name: nfc-fsanchez
+    image: ghcr.io/${GHCR_OWNER}/nfc-fsanchez:${IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT}:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      MONGODB_URI: ${DATABASE_MONGO}
+      DATABASE_MONGO: ${DATABASE_MONGO}
+      MONGODB_DB_NAME: ${MONGODB_DB_NAME}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  mongo:
+    container_name: nfc-fsanchez-mongo
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGODB_DB_NAME}
+    volumes:
+      - nfc-fsanchez-mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  nfc-fsanchez-mongo-data:
