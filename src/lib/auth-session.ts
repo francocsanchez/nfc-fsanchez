@@ -3,9 +3,11 @@ import "server-only";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 
 export async function getSessionFromHeaders(requestHeaders: Headers) {
+  const auth = await getAuth();
+
   return auth.api.getSession({
     headers: requestHeaders,
   });
