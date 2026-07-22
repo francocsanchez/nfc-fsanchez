@@ -53,7 +53,6 @@ Se incluye [docker-compose.yml](./docker-compose.yml) listo para usar como stack
 Variables recomendadas para el stack:
 
 ```env
-APP_PORT=3000
 DATABASE_MONGO=mongodb://admin:TU_PASSWORD@192.168.100.31:27017/nfc-fsanchez?authSource=admin
 NEXT_PUBLIC_APP_URL=https://nfc.tu-dominio.com
 ```
@@ -62,6 +61,7 @@ Notas:
 
 - Si el paquete de GHCR queda privado, Portainer necesita credenciales de registry con permiso de lectura.
 - El stack esta pensado para Mongo externo, igual que `intraNIC`: Portainer solo levanta la app y le inyecta `DATABASE_MONGO`.
+- El puerto publicado queda fijo en `32768:3000`.
 - La URI debe incluir el nombre de la base en la ruta, por ejemplo `mongodb://usuario:password@host:27017/nfc-fsanchez?authSource=admin`.
 
 ## GitHub Actions

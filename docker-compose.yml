@@ -6,7 +6,7 @@ services:
     image: ghcr.io/francocsanchez/nfc-fsanchez:latest
     restart: unless-stopped
     ports:
-      - "${APP_PORT}:3000"
+      - "32768:3000"
     environment:
       NODE_ENV: production
       PORT: 3000
