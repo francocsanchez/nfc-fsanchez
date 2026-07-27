@@ -34,14 +34,6 @@ type ApiErrorResponse = {
   fieldErrors?: FieldErrors;
 };
 
-const emptyValues: ReminderFormValues = {
-  title: "",
-  description: "",
-  date: "",
-  time: "",
-  alertIntervalMinutes: "",
-};
-
 const intervalLabels: Record<string, string> = {
   "5": "Cada 5 min",
   "10": "Cada 10 min",
@@ -65,6 +57,20 @@ function formatDateTime(remindAt: string) {
   }).format(new Date(remindAt));
 }
 
+function getDefaultFormValues(): ReminderFormValues {
+  const now = new Date();
+  const date = `${now.getFullYear()}-${`${now.getMonth() + 1}`.padStart(2, "0")}-${`${now.getDate()}`.padStart(2, "0")}`;
+  const time = `${`${now.getHours()}`.padStart(2, "0")}:${`${now.getMinutes()}`.padStart(2, "0")}`;
+
+  return {
+    title: "",
+    description: "",
+    date,
+    time,
+    alertIntervalMinutes: "",
+  };
+}
+
 export function RemindersDashboardClient({
   initialReminders,
   userName,
@@ -72,12 +78,16 @@ export function RemindersDashboardClient({
   pushConfigured,
 }: RemindersDashboardClientProps) {
   const [reminders, setReminders] = useState(initialReminders);
-  const [formValues, setFormValues] = useState<ReminderFormValues>(emptyValues);
+  const [formValues, setFormValues] = useState<ReminderFormValues>(
+    getDefaultFormValues,
+  );
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [showDescription, setShowDescription] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
+  const [pushStatusMessage, setPushStatusMessage] = useState<string | null>(null);
 
   async function refreshReminders() {
     const response = await fetch("/api/reminders", { cache: "no-store" });
@@ -149,6 +159,50 @@ export function RemindersDashboardClient({
     });
   }
 
+  async function enableNotifications() {
+    if (!pushConfigured) {
+      setPushStatusMessage(
+        "Las notificaciones push todavia no estan configuradas en el servidor.",
+      );
+      return;
+    }
+
+    if (
+      typeof window === "undefined" ||
+      !("Notification" in window) ||
+      !("serviceWorker" in navigator) ||
+      !("PushManager" in window)
+    ) {
+      setPushStatusMessage(
+        "Este navegador no soporta notificaciones push en esta PWA.",
+      );
+      return;
+    }
+
+    setPushBusy(true);
+    setPushStatusMessage(null);
+
+    try {
+      const permission = await Notification.requestPermission();
+
+      if (permission !== "granted") {
+        setPushStatusMessage(
+          permission === "denied"
+            ? "Debes habilitar las notificaciones desde el navegador."
+            : "No se concedio el permiso de notificaciones.",
+        );
+        return;
+      }
+
+      await ensurePushSubscription();
+      setPushStatusMessage("Notificaciones activadas correctamente.");
+    } catch (error) {
+      setPushStatusMessage(getErrorMessage(error));
+    } finally {
+      setPushBusy(false);
+    }
+  }
+
   async function submitReminder(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFieldErrors({});
@@ -190,7 +244,7 @@ export function RemindersDashboardClient({
         return;
       }
 
-      setFormValues(emptyValues);
+      setFormValues(getDefaultFormValues());
       setShowDescription(false);
       await refreshReminders();
     } catch (error) {
@@ -238,6 +292,23 @@ export function RemindersDashboardClient({
   return (
     <main className="min-h-screen bg-[#f6f1ea] px-3 py-4 text-[#171717] sm:px-4">
       <div className="mx-auto flex w-full max-w-md flex-col gap-4">
+        <section className="rounded-[1.75rem] bg-white p-4 shadow-[0_14px_40px_rgba(23,23,23,0.08)]">
+          <Button
+            type="button"
+            size="lg"
+            onClick={enableNotifications}
+            disabled={pushBusy}
+            className="h-12 w-full rounded-[1.15rem] bg-[#1f1f1f] text-white hover:bg-[#2b2b2b]"
+          >
+            {pushBusy ? "Activando..." : "Activar notificaciones"}
+          </Button>
+          {pushStatusMessage ? (
+            <p className="mt-3 text-sm leading-6 text-[#66615a]">
+              {pushStatusMessage}
+            </p>
+          ) : null}
+        </section>
+
         <header className="rounded-[1.75rem] bg-white p-4 shadow-[0_14px_40px_rgba(23,23,23,0.08)]">
           <p className="text-[0.72rem] uppercase tracking-[0.26em] text-[#c1774e]">
             Recordatorios
@@ -304,7 +375,7 @@ export function RemindersDashboardClient({
               </button>
             )}
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               <div>
                 <input
                   type="date"
