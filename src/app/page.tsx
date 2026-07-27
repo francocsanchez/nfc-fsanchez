@@ -36,24 +36,27 @@ export default function Home() {
               </p>
             </Link>
 
-            <div className="rounded-[1.75rem] border border-black/10 bg-zinc-50 p-6">
-              <p className="text-sm uppercase tracking-[0.24em] text-zinc-500">
-                Ruta publica
+            <Link
+              href="/recordatorios"
+              className="rounded-[1.75rem] border border-[#d9b8a6] bg-[linear-gradient(145deg,#fff5ef_0%,#fffdf9_100%)] p-6 transition hover:border-[#c98b6a] hover:shadow-[0_18px_40px_rgba(201,139,106,0.16)]"
+            >
+              <p className="text-sm uppercase tracking-[0.24em] text-[#9c5e3d]">
+                Micro SaaS PWA
               </p>
               <h2 className="mt-3 text-2xl font-semibold text-zinc-950">
-                /slug
+                Recordatorios recurrentes
               </h2>
-              <p className="mt-2 text-sm leading-6 text-zinc-600">
-                Cada perfil activo expone una vista lista para moviles con CTA
-                principal al link configurado.
+              <p className="mt-2 text-sm leading-6 text-zinc-700">
+                Un segundo producto dentro del proyecto: tareas con push
+                insistente hasta completarlas.
               </p>
-            </div>
+            </Link>
           </div>
         </div>
 
         <p className="mt-10 text-sm text-zinc-500">
-          Proximo paso natural: sumar autenticacion con Better Auth y luego el
-          diseno visual final.
+          La plataforma ahora convive con dos superficies: perfiles NFC y la
+          nueva PWA de recordatorios.
         </p>
       </div>
     </main>

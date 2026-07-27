@@ -182,7 +182,7 @@ export default async function PublicProfilePage({
             rel="noreferrer"
             className="flex h-16 items-center justify-center rounded-[2rem] border border-[#c5c6ca] bg-white/50 px-6 text-[14px] font-medium text-[#000101] transition active:scale-[0.98]"
           >
-            Mensaje
+            Enviar WhatsApp !
           </a>
         </section>
 
@@ -219,16 +219,6 @@ export default async function PublicProfilePage({
             eyebrow="Correo"
             title={profile.email}
             href={`mailto:${profile.email}`}
-          />
-          <QuickLinkCard
-            eyebrow="WhatsApp"
-            title={profile.whatsapp}
-            href={whatsappUrl}
-          />
-          <QuickLinkCard
-            eyebrow="NFC Route"
-            title={`/${profile.slug}`}
-            href={publicUrl}
           />
         </section>
 

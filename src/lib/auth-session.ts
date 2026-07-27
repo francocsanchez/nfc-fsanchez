@@ -17,12 +17,16 @@ export async function getCurrentSession() {
   return getSessionFromHeaders(await headers());
 }
 
-export async function requireAdminSession() {
+export async function requireSession(nextPath = "/admin/perfiles") {
   const session = await getCurrentSession();
 
   if (!session) {
-    redirect("/login");
+    redirect(`/login?next=${encodeURIComponent(nextPath)}`);
   }
 
   return session;
+}
+
+export async function requireAdminSession() {
+  return requireSession("/admin/perfiles");
 }

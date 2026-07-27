@@ -3,11 +3,18 @@ import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/login-form";
 import { getCurrentSession } from "@/lib/auth-session";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: PageProps<"/login">) {
   const session = await getCurrentSession();
+  const params = await searchParams;
+  const next =
+    typeof params.next === "string" && params.next.startsWith("/")
+      ? params.next
+      : "/admin/perfiles";
 
   if (session) {
-    redirect("/admin/perfiles");
+    redirect(next);
   }
 
   return (
@@ -36,7 +43,8 @@ export default async function LoginPage() {
                 Ingresar al admin
               </h2>
               <p className="mt-2 text-sm leading-6 text-zinc-600">
-                Usa tu email y contrasena para continuar.
+                Usa tu email y contrasena para continuar. Si venias de otra
+                seccion, te devolvemos automaticamente.
               </p>
 
               <div className="mt-8">

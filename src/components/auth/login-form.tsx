@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackURL = searchParams.get("next") ?? "/admin/perfiles";
+  const nextParam = searchParams.get("next");
+  const callbackURL =
+    nextParam && nextParam.startsWith("/") ? nextParam : "/admin/perfiles";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
