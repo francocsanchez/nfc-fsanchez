@@ -47,7 +47,7 @@ export default async function RemindersLandingPage() {
                 {ctaLabel}
               </Link>
               <Link
-                href="/admin/perfiles"
+                href="/credenciales/perfiles/admin"
                 className="inline-flex h-11 items-center justify-center rounded-full border border-white/15 bg-white/5 px-6 text-sm text-[#f6efe7] transition hover:bg-white/10"
               >
                 Volver al panel NFC

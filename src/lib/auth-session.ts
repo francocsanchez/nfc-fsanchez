@@ -17,7 +17,7 @@ export async function getCurrentSession() {
   return getSessionFromHeaders(await headers());
 }
 
-export async function requireSession(nextPath = "/admin/perfiles") {
+export async function requireSession(nextPath = "/credenciales/perfiles/admin") {
   const session = await getCurrentSession();
 
   if (!session) {
@@ -28,5 +28,5 @@ export async function requireSession(nextPath = "/admin/perfiles") {
 }
 
 export async function requireAdminSession() {
-  return requireSession("/admin/perfiles");
+  return requireSession("/credenciales/perfiles/admin");
 }

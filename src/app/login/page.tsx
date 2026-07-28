@@ -11,7 +11,7 @@ export default async function LoginPage({
   const next =
     typeof params.next === "string" && params.next.startsWith("/")
       ? params.next
-      : "/admin/perfiles";
+      : "/credenciales/perfiles/admin";
 
   if (session) {
     redirect(next);

@@ -72,7 +72,7 @@ Las rutas bajo `/admin` ahora usan Better Auth con email y contrasena.
 Notas:
 
 - Si el paquete de GHCR queda privado, Portainer necesita credenciales de registry con permiso de lectura.
-- El stack esta pensado para Mongo externo, igual que `intraNIC`: Portainer solo levanta la app y le inyecta `DATABASE_MONGO`.
+- El stack esta pensado para Mongo externo: Portainer solo levanta la app y le inyecta `DATABASE_MONGO`.
 - El puerto publicado queda fijo en `32768:3000`.
 - La URI debe incluir el nombre de la base en la ruta, por ejemplo `mongodb://usuario:password@host:27017/nfc-fsanchez?authSource=admin`.
 

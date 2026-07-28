@@ -1,63 +1,109 @@
 import Link from "next/link";
+import { ArrowUpRight, BellRing, CreditCard } from "lucide-react";
+
+const apps = [
+  {
+    href: "/credenciales/perfiles/admin",
+    name: "Credenciales",
+    subtitle: "Perfiles NFC",
+    description:
+      "Administra altas, ediciones y estados de los perfiles publicos desde una sola vista.",
+    icon: CreditCard,
+    tone: "bg-foreground text-background",
+    accent: "text-background/70",
+    action:
+      "Abrir panel",
+  },
+  {
+    href: "/recordatorios",
+    name: "Recordatorios",
+    subtitle: "Tareas insistentes",
+    description:
+      "Entra a la app de recordatorios y continua con la experiencia mobile-first del modulo.",
+    icon: BellRing,
+    tone: "border border-border bg-card text-card-foreground",
+    accent: "text-muted-foreground",
+    action: "Entrar a la app",
+  },
+] as const;
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#f7f6f2_0%,#ece8df_100%)] px-4 py-6 sm:px-6 sm:py-10">
-      <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-5xl flex-col justify-between rounded-[2rem] border border-black/10 bg-white/90 p-6 shadow-[0_20px_60px_rgba(20,20,20,0.08)] backdrop-blur sm:p-10">
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <span className="inline-flex rounded-full border border-black/10 bg-black/5 px-3 py-1 text-[0.7rem] font-medium uppercase tracking-[0.22em] text-zinc-700">
-              NFC platform
-            </span>
-            <div className="max-w-2xl space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight text-zinc-950 sm:text-5xl">
-                Gestion de perfiles para tags NFC
-              </h1>
-              <p className="text-base leading-7 text-zinc-600 sm:text-lg">
-                Esta primera version ya resuelve el CRUD interno de perfiles y
-                la landing publica mobile-first que se abre al escanear cada
-                tag.
-              </p>
+    <main className="min-h-screen bg-background">
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 py-6 sm:px-6 lg:px-8">
+        <div className="relative flex flex-1 flex-col justify-between overflow-hidden border border-border bg-background">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.02)_0%,transparent_18%,transparent_100%)]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-foreground/10" />
+
+          <section className="relative border-b border-border px-6 py-12 sm:px-10 sm:py-16 lg:px-14">
+            <div className="max-w-3xl space-y-6">
+              <span className="inline-flex text-[0.72rem] font-medium uppercase tracking-[0.34em] text-muted-foreground">
+                Inicio
+              </span>
+              <div className="space-y-4">
+                <h1 className="max-w-2xl text-4xl font-semibold tracking-[-0.06em] text-foreground sm:text-5xl lg:text-6xl">
+                  Dos accesos claros para entrar y seguir trabajando.
+                </h1>
+                <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
+                  Esta portada funciona como punto de entrada rapido para las
+                  dos superficies activas del proyecto: credenciales NFC y
+                  recordatorios.
+                </p>
+              </div>
             </div>
-          </div>
+          </section>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Link
-              href="/admin/perfiles"
-              className="rounded-[1.75rem] bg-zinc-950 p-6 text-white transition hover:bg-zinc-800"
-            >
-              <p className="text-sm uppercase tracking-[0.24em] text-zinc-400">
-                Administracion
-              </p>
-              <h2 className="mt-3 text-2xl font-semibold">Ir al CRUD</h2>
-              <p className="mt-2 text-sm leading-6 text-zinc-300">
-                Crear, editar, activar y desactivar perfiles desde una sola
-                tabla con modal.
-              </p>
-            </Link>
+          <section className="relative grid gap-px bg-border md:grid-cols-2">
+            {apps.map((app) => {
+              const Icon = app.icon;
 
-            <Link
-              href="/recordatorios"
-              className="rounded-[1.75rem] border border-[#d9b8a6] bg-[linear-gradient(145deg,#fff5ef_0%,#fffdf9_100%)] p-6 transition hover:border-[#c98b6a] hover:shadow-[0_18px_40px_rgba(201,139,106,0.16)]"
-            >
-              <p className="text-sm uppercase tracking-[0.24em] text-[#9c5e3d]">
-                Micro SaaS PWA
-              </p>
-              <h2 className="mt-3 text-2xl font-semibold text-zinc-950">
-                Recordatorios recurrentes
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-zinc-700">
-                Un segundo producto dentro del proyecto: tareas con push
-                insistente hasta completarlas.
-              </p>
-            </Link>
-          </div>
+              return (
+                <Link
+                  key={app.name}
+                  href={app.href}
+                  className={`group relative flex min-h-[18rem] flex-col justify-between px-6 py-6 transition sm:px-10 sm:py-8 ${app.tone}`}
+                >
+                  <div className="space-y-10">
+                    <div className="flex items-start justify-between gap-4">
+                      <span className="inline-flex h-11 w-11 items-center justify-center border border-current/15">
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <ArrowUpRight className="h-5 w-5 transition duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                    </div>
+
+                    <div className="space-y-3">
+                      <p className={`text-[0.72rem] uppercase tracking-[0.3em] ${app.accent}`}>
+                        {app.subtitle}
+                      </p>
+                      <h2 className="text-3xl font-semibold tracking-[-0.05em]">
+                        {app.name}
+                      </h2>
+                      <p
+                        className={`max-w-md text-sm leading-7 sm:text-base ${
+                          app.name === "Credenciales"
+                            ? "text-background/78"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        {app.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-current/10 pt-5 text-sm uppercase tracking-[0.22em]">
+                    <span>{app.action}</span>
+                    <span className={app.accent}>Disponible</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </section>
+
+          <footer className="relative flex flex-col gap-3 px-6 py-5 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-14">
+            <p>Entrada principal del proyecto.</p>
+            <p>Simple, limpia y enfocada en acceso rapido.</p>
+          </footer>
         </div>
-
-        <p className="mt-10 text-sm text-zinc-500">
-          La plataforma ahora convive con dos superficies: perfiles NFC y la
-          nueva PWA de recordatorios.
-        </p>
       </div>
     </main>
   );

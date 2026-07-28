@@ -11,7 +11,9 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
   const callbackURL =
-    nextParam && nextParam.startsWith("/") ? nextParam : "/admin/perfiles";
+    nextParam && nextParam.startsWith("/")
+      ? nextParam
+      : "/credenciales/perfiles/admin";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);

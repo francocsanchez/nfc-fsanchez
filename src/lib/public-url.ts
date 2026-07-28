@@ -3,7 +3,7 @@ function normalizeBaseUrl(baseUrl: string) {
 }
 
 export function getPublicProfileUrl(slug: string, baseUrl = process.env.NEXT_PUBLIC_APP_URL) {
-  const path = `/${slug}`;
+  const path = `/credenciales/${slug}`;
 
   if (!baseUrl) {
     return path;

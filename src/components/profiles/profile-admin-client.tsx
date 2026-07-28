@@ -632,8 +632,8 @@ export function ProfileAdminClient({
       if ("profile" in data && data.profile) {
         setSuccessMessage(
           modalMode === "create"
-            ? `Perfil creado. URL publica lista: /${data.profile.slug}`
-            : `Perfil actualizado. URL publica: /${data.profile.slug}`,
+            ? `Perfil creado. URL publica lista: /credenciales/${data.profile.slug}`
+            : `Perfil actualizado. URL publica: /credenciales/${data.profile.slug}`,
         );
       }
 
@@ -676,8 +676,8 @@ export function ProfileAdminClient({
       await refreshProfiles();
       setSuccessMessage(
         isActive
-          ? `Perfil reactivado: /${profile.slug}`
-          : `Perfil desactivado: /${profile.slug}`,
+          ? `Perfil reactivado: /credenciales/${profile.slug}`
+          : `Perfil desactivado: /credenciales/${profile.slug}`,
       );
     } catch (error) {
       setSubmitError(getErrorMessage(error));
@@ -847,11 +847,11 @@ export function ProfileAdminClient({
                     </td>
                     <td className="px-4 py-4">
                       <Link
-                        href={`/${profile.slug}`}
+                        href={`/credenciales/${profile.slug}`}
                         target="_blank"
                         className="text-sm font-medium text-primary underline-offset-4 hover:underline"
                       >
-                        /{profile.slug}
+                        /credenciales/{profile.slug}
                       </Link>
                     </td>
                     <td className="px-4 py-4">
