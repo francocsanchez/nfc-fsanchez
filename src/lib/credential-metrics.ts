@@ -109,14 +109,12 @@ export async function incrementCredentialMetric(
       slug,
       anio,
       mes,
-      saveContactClicks: 0,
-      whatsappClicks: 0,
       createdAt: now,
     } satisfies OptionalUnlessRequiredId<CredentialMetricDocument>,
     $inc: {
       [incrementField]: 1,
     },
-  });
+  }, { upsert: true });
 }
 
 export async function listCredentialMetrics() {
