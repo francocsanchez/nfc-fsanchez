@@ -3,6 +3,10 @@ import { NextResponse } from "next/server";
 import { incrementCredentialMetric } from "@/lib/credential-metrics";
 import { getPublicProfileBySlug } from "@/lib/profiles";
 
+function getRedirectBaseUrl(request: Request) {
+  return process.env.NEXT_PUBLIC_APP_URL?.trim() || request.url;
+}
+
 export async function GET(
   request: Request,
   context: { params: Promise<{ slug: string }> },
@@ -16,5 +20,7 @@ export async function GET(
 
   await incrementCredentialMetric(profile.slug, "save_contact");
 
-  return NextResponse.redirect(new URL(`/api/contacts/${profile.slug}`, request.url));
+  return NextResponse.redirect(
+    new URL(`/api/contacts/${profile.slug}`, getRedirectBaseUrl(request)),
+  );
 }
