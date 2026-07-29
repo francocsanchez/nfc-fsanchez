@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Download, Upload } from "lucide-react";
+import { Download, Globe, Upload } from "lucide-react";
 import { startTransition, useRef, useState } from "react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -24,7 +24,7 @@ type ProfileAdminClientProps = {
 
 type FieldErrors = Partial<
   Record<
-    "name" | "jobTitle" | "address" | "googleMapsUrl" | "email" | "whatsapp" | "rol",
+    "name" | "jobTitle" | "address" | "googleMapsUrl" | "websiteUrl" | "email" | "whatsapp" | "rol",
     string[]
   >
 >;
@@ -45,6 +45,7 @@ type FormValues = {
   jobTitle: string;
   address: string;
   googleMapsUrl: string;
+  websiteUrl: string;
   email: string;
   whatsapp: string;
   rol: Profile["rol"];
@@ -61,6 +62,7 @@ const emptyValues: FormValues = {
   jobTitle: "",
   address: "",
   googleMapsUrl: "",
+  websiteUrl: "",
   email: "",
   whatsapp: "",
   rol: "general",
@@ -351,6 +353,29 @@ function ProfileModal({
                 {errors.googleMapsUrl?.[0] ? (
                   <p className="text-sm text-destructive">
                     {errors.googleMapsUrl[0]}
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="profile-website-url"
+                  className="text-sm font-medium"
+                >
+                  Sitio web
+                </label>
+                <input
+                  id="profile-website-url"
+                  type="url"
+                  value={values.websiteUrl}
+                  onChange={(event) => onChange("websiteUrl", event.target.value)}
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+                  placeholder="https://..."
+                  autoComplete="url"
+                />
+                {errors.websiteUrl?.[0] ? (
+                  <p className="text-sm text-destructive">
+                    {errors.websiteUrl[0]}
                   </p>
                 ) : null}
               </div>
@@ -659,6 +684,7 @@ export function ProfileAdminClient({
       jobTitle: profile.jobTitle,
       address: profile.address,
       googleMapsUrl: profile.googleMapsUrl,
+      websiteUrl: profile.websiteUrl,
       email: profile.email,
       whatsapp: profile.whatsapp,
       rol: profile.rol,
@@ -758,6 +784,7 @@ export function ProfileAdminClient({
             jobTitle: formValues.jobTitle,
             address: formValues.address,
             googleMapsUrl: formValues.googleMapsUrl,
+            websiteUrl: formValues.websiteUrl,
             email: formValues.email,
             whatsapp: formValues.whatsapp,
             rol: formValues.rol,
@@ -767,6 +794,7 @@ export function ProfileAdminClient({
             jobTitle: formValues.jobTitle,
             address: formValues.address,
             googleMapsUrl: formValues.googleMapsUrl,
+            websiteUrl: formValues.websiteUrl,
             email: formValues.email,
             whatsapp: formValues.whatsapp,
             rol: formValues.rol,
@@ -843,6 +871,7 @@ export function ProfileAdminClient({
           jobTitle: profile.jobTitle,
           address: profile.address,
           googleMapsUrl: profile.googleMapsUrl,
+          websiteUrl: profile.websiteUrl,
           email: profile.email,
           whatsapp: profile.whatsapp,
           rol: profile.rol,
@@ -1268,6 +1297,17 @@ export function ProfileAdminClient({
                             className="text-sm text-primary underline-offset-4 hover:underline"
                           >
                             Abrir en Google Maps
+                          </a>
+                        ) : null}
+                        {profile.websiteUrl ? (
+                          <a
+                            href={profile.websiteUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-2 text-sm text-primary underline-offset-4 hover:underline"
+                          >
+                            <Globe className="h-4 w-4" />
+                            Sitio web
                           </a>
                         ) : null}
                         <p className="text-sm text-muted-foreground">

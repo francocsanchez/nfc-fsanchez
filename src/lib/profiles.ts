@@ -25,6 +25,7 @@ export type ProfileDocument = {
   jobTitle: string;
   address: string;
   googleMapsUrl: string;
+  websiteUrl?: string;
   email: string;
   whatsapp: string;
   profilePhotoUrl?: string;
@@ -72,6 +73,7 @@ function serializeProfile(profile: WithId<ProfileDocument>): Profile {
     jobTitle: profile.jobTitle ?? "",
     address: profile.address ?? "",
     googleMapsUrl: profile.googleMapsUrl ?? "",
+    websiteUrl: profile.websiteUrl ?? "",
     email: profile.email,
     whatsapp: profile.whatsapp ?? "",
     profilePhotoUrl: profile.profilePhotoUrl ?? "",
@@ -236,6 +238,7 @@ export async function updateProfile(id: string, input: UpdateProfileInput) {
         jobTitle: data.jobTitle,
         address: data.address,
         googleMapsUrl: data.googleMapsUrl,
+        websiteUrl: data.websiteUrl,
         email: data.email,
         whatsapp: data.whatsapp,
         rol: data.rol,

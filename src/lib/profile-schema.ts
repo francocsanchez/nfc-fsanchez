@@ -27,6 +27,16 @@ const optionalUrlField = z
     },
   );
 
+const optionalWebsiteUrlField = z
+  .string()
+  .trim()
+  .optional()
+  .or(z.literal(""))
+  .transform((value) => value ?? "")
+  .refine((value) => value === "" || /^https?:\/\//i.test(value), {
+    message: "Ingresa un link valido",
+  });
+
 const whatsappSchema = z
   .string()
   .trim()
@@ -51,6 +61,7 @@ export const createProfileSchema = z.object({
   jobTitle: optionalTextField(120),
   address: optionalTextField(160),
   googleMapsUrl: optionalUrlField,
+  websiteUrl: optionalWebsiteUrlField,
   email: z.string().trim().email("Ingresa un email valido").max(160),
   whatsapp: whatsappSchema,
   rol: profileRoleSchema.default("general"),
@@ -69,6 +80,7 @@ export type Profile = {
   jobTitle: string;
   address: string;
   googleMapsUrl: string;
+  websiteUrl: string;
   email: string;
   whatsapp: string;
   profilePhotoUrl: string;

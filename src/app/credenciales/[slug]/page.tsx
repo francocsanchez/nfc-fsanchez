@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Download, FileText, MapPin, MessageCircle } from "lucide-react";
+import { Download, FileText, Globe, MapPin, MessageCircle } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { getCatalogSettings } from "@/lib/catalog";
@@ -124,6 +124,20 @@ export default async function PublicProfilePage({
                     <p>{profile.address}</p>
                   )}
                 </div>
+
+                {profile.websiteUrl ? (
+                  <div className="flex items-start gap-3 text-sm leading-6 text-muted-foreground">
+                    <Globe className="mt-0.5 h-4 w-4 shrink-0 text-foreground" />
+                    <a
+                      href={profile.websiteUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline decoration-border underline-offset-4 transition hover:text-foreground"
+                    >
+                      {profile.websiteUrl}
+                    </a>
+                  </div>
+                ) : null}
               </div>
             </div>
 
