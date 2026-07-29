@@ -71,6 +71,7 @@ export type Profile = {
   googleMapsUrl: string;
   email: string;
   whatsapp: string;
+  profilePhotoUrl: string;
   rol: z.infer<typeof profileRoleSchema>;
   slug: string;
   isActive: boolean;

@@ -3,7 +3,6 @@ import "server-only";
 import {
   type Collection,
   type Filter,
-  type OptionalUnlessRequiredId,
   type WithId,
 } from "mongodb";
 
@@ -100,17 +99,18 @@ export async function incrementCredentialMetric(
   const filter: Filter<CredentialMetricDocument> = { slug, anio, mes };
   const incrementField =
     event === "save_contact" ? "saveContactClicks" : "whatsappClicks";
+  const setOnInsert = {
+    slug,
+    anio,
+    mes,
+    createdAt: now,
+  };
 
   await collection.updateOne(filter, {
     $set: {
       updatedAt: now,
     },
-    $setOnInsert: {
-      slug,
-      anio,
-      mes,
-      createdAt: now,
-    } satisfies OptionalUnlessRequiredId<CredentialMetricDocument>,
+    $setOnInsert: setOnInsert,
     $inc: {
       [incrementField]: 1,
     },

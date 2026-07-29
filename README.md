@@ -10,6 +10,9 @@ Variables base:
 DATABASE_MONGO=mongodb://localhost:27017/nfc_fsanchez
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 BETTER_AUTH_SECRET=replace-with-a-random-secret-of-32-chars-or-more
+IMAGEKIT_PUBLIC_KEY=
+IMAGEKIT_PRIVATE_KEY=
+IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/<tu_imagekit_id>
 ```
 
 Comandos:
@@ -33,6 +36,9 @@ docker run --rm -p 3000:3000 ^
   -e DATABASE_MONGO=mongodb://host.docker.internal:27017/nfc_fsanchez ^
   -e NEXT_PUBLIC_APP_URL=http://localhost:3000 ^
   -e BETTER_AUTH_SECRET=replace-with-a-random-secret-of-32-chars-or-more ^
+  -e IMAGEKIT_PUBLIC_KEY=your_public_key ^
+  -e IMAGEKIT_PRIVATE_KEY=your_private_key ^
+  -e IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your_imagekit_id ^
   nfc-fsanchez:local
 ```
 
@@ -58,6 +64,9 @@ Variables recomendadas para el stack:
 DATABASE_MONGO=mongodb://admin:TU_PASSWORD@192.168.100.31:27017/nfc-fsanchez?authSource=admin
 NEXT_PUBLIC_APP_URL=https://nfc.tu-dominio.com
 BETTER_AUTH_SECRET=genera-un-secreto-largo-y-aleatorio
+IMAGEKIT_PUBLIC_KEY=tu_public_key
+IMAGEKIT_PRIVATE_KEY=tu_private_key
+IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/tu_imagekit_id
 ```
 
 ## Auth de admin

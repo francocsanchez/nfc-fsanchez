@@ -25,6 +25,47 @@ function getInitials(name: string) {
   return parts.map((part) => part[0]?.toUpperCase() ?? "").join("");
 }
 
+function getProfilePhotoSrc(profilePhotoUrl: string, updatedAt: string) {
+  if (!profilePhotoUrl) {
+    return "";
+  }
+
+  const separator = profilePhotoUrl.includes("?") ? "&" : "?";
+
+  return `${profilePhotoUrl}${separator}v=${encodeURIComponent(updatedAt)}`;
+}
+
+function ProfileAvatar({
+  name,
+  profilePhotoUrl,
+  updatedAt,
+}: {
+  name: string;
+  profilePhotoUrl: string;
+  updatedAt: string;
+}) {
+  if (profilePhotoUrl) {
+    return (
+      <div className="h-20 w-20 overflow-hidden border border-foreground bg-background">
+        <Image
+          src={getProfilePhotoSrc(profilePhotoUrl, updatedAt)}
+          alt={`Foto de perfil de ${name}`}
+          width={160}
+          height={160}
+          unoptimized
+          className="h-full w-full object-cover"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-20 w-20 items-center justify-center border border-foreground bg-background text-2xl font-semibold tracking-[-0.08em]">
+      {getInitials(name)}
+    </div>
+  );
+}
+
 export default async function PublicProfilePage({
   params,
 }: {
@@ -37,7 +78,6 @@ export default async function PublicProfilePage({
     notFound();
   }
 
-  const initials = getInitials(profile.name);
   const whatsappUrl = getWhatsappUrl(profile.whatsapp);
   const contactCardUrl = `/api/credenciales/${profile.slug}/contact-click`;
   const whatsappTrackingUrl = `/api/credenciales/${profile.slug}/whatsapp-click`;
@@ -51,9 +91,11 @@ export default async function PublicProfilePage({
         <section className="relative overflow-hidden border border-border bg-card">
           <div className="space-y-8 px-5 py-6">
             <div className="space-y-5">
-              <div className="flex h-20 w-20 items-center justify-center border border-foreground bg-background text-2xl font-semibold tracking-[-0.08em]">
-                {initials}
-              </div>
+              <ProfileAvatar
+                name={profile.name}
+                profilePhotoUrl={profile.profilePhotoUrl}
+                updatedAt={profile.updatedAt}
+              />
 
               <div className="space-y-3">
                 <div className="space-y-2">

@@ -73,6 +73,30 @@ const emptyPasswordValues: ChangePasswordValues = {
   confirmPassword: "",
 };
 
+function getProfileInitials(name: string) {
+  const parts = name
+    .split(" ")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .slice(0, 2);
+
+  if (parts.length === 0) {
+    return "NF";
+  }
+
+  return parts.map((part) => part[0]?.toUpperCase() ?? "").join("");
+}
+
+function getProfilePhotoSrc(profilePhotoUrl: string, updatedAt: string) {
+  if (!profilePhotoUrl) {
+    return "";
+  }
+
+  const separator = profilePhotoUrl.includes("?") ? "&" : "?";
+
+  return `${profilePhotoUrl}${separator}v=${encodeURIComponent(updatedAt)}`;
+}
+
 function getErrorMessage(error: unknown) {
   if (error instanceof Error) {
     return error.message;
@@ -87,10 +111,16 @@ function ProfileModal({
   values,
   errors,
   submitting,
+  photoSubmitting,
+  photoError,
   submitError,
   slug,
   publicUrl,
+  profilePhotoUrl,
+  updatedAt,
   onChange,
+  onOpenPhotoUpload,
+  onRemovePhoto,
   onClose,
   onSubmit,
 }: {
@@ -99,16 +129,25 @@ function ProfileModal({
   values: FormValues;
   errors: FieldErrors;
   submitting: boolean;
+  photoSubmitting: boolean;
+  photoError: string | null;
   submitError: string | null;
   slug?: string;
   publicUrl?: string;
+  profilePhotoUrl?: string;
+  updatedAt?: string;
   onChange: (field: keyof FormValues, value: string | boolean) => void;
+  onOpenPhotoUpload: () => void;
+  onRemovePhoto: () => void;
   onClose: () => void;
   onSubmit: () => void;
 }) {
   if (!open) {
     return null;
   }
+
+  const modalBusy = submitting || photoSubmitting;
+  const initials = getProfileInitials(values.name);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-0 sm:p-6">
@@ -134,7 +173,7 @@ function ProfileModal({
               variant="ghost"
               size="icon-sm"
               onClick={onClose}
-              disabled={submitting}
+              disabled={modalBusy}
             >
               <span className="sr-only">Cerrar modal</span>x
             </Button>
@@ -147,6 +186,74 @@ function ProfileModal({
               onSubmit();
             }}
           >
+            <div className="rounded-3xl border border-border bg-card p-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-4">
+                  {profilePhotoUrl ? (
+                    <div className="h-20 w-20 overflow-hidden rounded-2xl border border-border bg-muted">
+                      <Image
+                        src={getProfilePhotoSrc(profilePhotoUrl, updatedAt ?? "")}
+                        alt={`Foto de perfil de ${values.name || "este perfil"}`}
+                        width={160}
+                        height={160}
+                        unoptimized
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-border bg-muted text-2xl font-semibold tracking-[-0.08em]">
+                      {initials}
+                    </div>
+                  )}
+
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">Foto de perfil</p>
+                    <p className="text-xs text-muted-foreground">
+                      JPG, PNG o WebP de hasta 1 MB.
+                    </p>
+                    {mode === "create" ? (
+                      <p className="text-xs text-muted-foreground">
+                        Crea el perfil primero para poder subir la foto.
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+
+                {mode === "edit" ? (
+                  <div className="flex flex-col gap-2 sm:items-end">
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Button
+                        variant="outline"
+                        type="button"
+                        onClick={onOpenPhotoUpload}
+                        disabled={modalBusy}
+                      >
+                        {photoSubmitting
+                          ? "Subiendo..."
+                          : profilePhotoUrl
+                            ? "Reemplazar foto"
+                            : "Subir foto"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        type="button"
+                        onClick={onRemovePhoto}
+                        disabled={modalBusy || !profilePhotoUrl}
+                      >
+                        Quitar foto
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+
+              {photoError ? (
+                <div className="mt-4 rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                  {photoError}
+                </div>
+              ) : null}
+            </div>
+
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               <div className="space-y-1.5">
                 <label htmlFor="profile-name" className="text-sm font-medium">
@@ -356,11 +463,11 @@ function ProfileModal({
                 variant="outline"
                 type="button"
                 onClick={onClose}
-                disabled={submitting}
+                disabled={modalBusy}
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={submitting}>
+              <Button type="submit" disabled={modalBusy}>
                 {submitting
                   ? "Guardando..."
                   : mode === "create"
@@ -529,7 +636,10 @@ export function ProfileAdminClient({
   const [catalogActionError, setCatalogActionError] = useState<string | null>(null);
   const [catalogDownloading, setCatalogDownloading] = useState(false);
   const [catalogUploading, setCatalogUploading] = useState(false);
+  const [photoSubmitting, setPhotoSubmitting] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
   const catalogFileInputRef = useRef<HTMLInputElement | null>(null);
+  const photoFileInputRef = useRef<HTMLInputElement | null>(null);
 
   function openCreateModal() {
     setModalMode("create");
@@ -537,6 +647,7 @@ export function ProfileAdminClient({
     setFormValues(emptyValues);
     setFieldErrors({});
     setSubmitError(null);
+    setPhotoError(null);
     setModalOpen(true);
   }
 
@@ -555,17 +666,19 @@ export function ProfileAdminClient({
     });
     setFieldErrors({});
     setSubmitError(null);
+    setPhotoError(null);
     setModalOpen(true);
   }
 
   function closeModal() {
-    if (submitting) {
+    if (submitting || photoSubmitting) {
       return;
     }
 
     setModalOpen(false);
     setFieldErrors({});
     setSubmitError(null);
+    setPhotoError(null);
   }
 
   function openPasswordModal() {
@@ -612,6 +725,14 @@ export function ProfileAdminClient({
     }
 
     catalogFileInputRef.current?.click();
+  }
+
+  function openPhotoUpload() {
+    if (modalMode !== "edit" || !selectedProfile || photoSubmitting) {
+      return;
+    }
+
+    photoFileInputRef.current?.click();
   }
 
   async function refreshProfiles() {
@@ -818,6 +939,80 @@ export function ProfileAdminClient({
     }
   }
 
+  async function uploadProfilePhoto(file: File) {
+    if (!selectedProfile) {
+      return;
+    }
+
+    setPhotoError(null);
+    setSubmitError(null);
+    setSuccessMessage(null);
+    setPhotoSubmitting(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(`/api/profiles/${selectedProfile.id}/photo`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = (await response.json()) as ApiErrorResponse & {
+        profile?: Profile;
+      };
+
+      if (!response.ok || !data.profile) {
+        throw new Error(data.error ?? "No se pudo subir la foto del perfil.");
+      }
+
+      await refreshProfiles();
+      setSelectedProfile(data.profile);
+      setSuccessMessage("Foto de perfil actualizada.");
+    } catch (error) {
+      setPhotoError(getErrorMessage(error));
+    } finally {
+      setPhotoSubmitting(false);
+
+      if (photoFileInputRef.current) {
+        photoFileInputRef.current.value = "";
+      }
+    }
+  }
+
+  async function removeProfilePhoto() {
+    if (!selectedProfile || !selectedProfile.profilePhotoUrl) {
+      return;
+    }
+
+    setPhotoError(null);
+    setSubmitError(null);
+    setSuccessMessage(null);
+    setPhotoSubmitting(true);
+
+    try {
+      const response = await fetch(`/api/profiles/${selectedProfile.id}/photo`, {
+        method: "DELETE",
+      });
+
+      const data = (await response.json()) as ApiErrorResponse & {
+        profile?: Profile;
+      };
+
+      if (!response.ok || !data.profile) {
+        throw new Error(data.error ?? "No se pudo eliminar la foto del perfil.");
+      }
+
+      await refreshProfiles();
+      setSelectedProfile(data.profile);
+      setSuccessMessage("Foto de perfil eliminada.");
+    } catch (error) {
+      setPhotoError(getErrorMessage(error));
+    } finally {
+      setPhotoSubmitting(false);
+    }
+  }
+
   async function submitPasswordChange() {
     setPasswordError(null);
     setSuccessMessage(null);
@@ -896,6 +1091,19 @@ export function ProfileAdminClient({
           </div>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
+          <input
+            ref={photoFileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+
+              if (file) {
+                void uploadProfilePhoto(file);
+              }
+            }}
+          />
           <Link
             href="/credenciales/perfiles/metricas"
             className={buttonVariants({ variant: "outline", size: "lg" })}
@@ -1143,12 +1351,18 @@ export function ProfileAdminClient({
         values={formValues}
         errors={fieldErrors}
         submitting={submitting}
+        photoSubmitting={photoSubmitting}
+        photoError={photoError}
         submitError={submitError}
         slug={selectedProfile?.slug}
         publicUrl={
           selectedProfile ? getPublicProfileUrl(selectedProfile.slug) : undefined
         }
+        profilePhotoUrl={selectedProfile?.profilePhotoUrl}
+        updatedAt={selectedProfile?.updatedAt}
         onChange={updateFormValue}
+        onOpenPhotoUpload={openPhotoUpload}
+        onRemovePhoto={removeProfilePhoto}
         onClose={closeModal}
         onSubmit={submitProfile}
       />

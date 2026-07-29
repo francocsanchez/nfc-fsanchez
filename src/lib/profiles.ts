@@ -27,6 +27,8 @@ export type ProfileDocument = {
   googleMapsUrl: string;
   email: string;
   whatsapp: string;
+  profilePhotoUrl?: string;
+  profilePhotoFileId?: string;
   rol?: "general" | "vendedor";
   slug: string;
   isActive: boolean;
@@ -40,6 +42,13 @@ export class DuplicateSlugError extends Error {
     this.name = "DuplicateSlugError";
   }
 }
+
+export type ProfilePhotoAsset = {
+  id: string;
+  slug: string;
+  profilePhotoUrl: string;
+  profilePhotoFileId: string;
+};
 
 let indexesPromise: Promise<void> | undefined;
 
@@ -65,6 +74,7 @@ function serializeProfile(profile: WithId<ProfileDocument>): Profile {
     googleMapsUrl: profile.googleMapsUrl ?? "",
     email: profile.email,
     whatsapp: profile.whatsapp ?? "",
+    profilePhotoUrl: profile.profilePhotoUrl ?? "",
     rol: profileRoleSchema.parse(profile.rol ?? "general"),
     slug: profile.slug,
     isActive: profile.isActive,
@@ -135,6 +145,37 @@ export async function getProfileById(id: string) {
   return profile ? serializeProfile(profile) : null;
 }
 
+export async function getProfilePhotoAssetById(id: string) {
+  const objectId = parseObjectId(id);
+
+  if (!objectId) {
+    return null;
+  }
+
+  const collection = await getProfilesCollection();
+  const profile = await collection.findOne(
+    { _id: objectId },
+    {
+      projection: {
+        slug: 1,
+        profilePhotoUrl: 1,
+        profilePhotoFileId: 1,
+      },
+    },
+  );
+
+  if (!profile) {
+    return null;
+  }
+
+  return {
+    id: profile._id.toHexString(),
+    slug: profile.slug,
+    profilePhotoUrl: profile.profilePhotoUrl ?? "",
+    profilePhotoFileId: profile.profilePhotoFileId ?? "",
+  } satisfies ProfilePhotoAsset;
+}
+
 export async function getPublicProfileBySlug(slug: string) {
   const collection = await getProfilesCollection();
   const profile = await collection.findOne({ slug, isActive: true });
@@ -150,6 +191,8 @@ export async function createProfile(input: CreateProfileInput) {
 
   const document: ProfileDocument = {
     ...data,
+    profilePhotoUrl: "",
+    profilePhotoFileId: "",
     slug,
     isActive: true,
     createdAt: now,
@@ -201,6 +244,61 @@ export async function updateProfile(id: string, input: UpdateProfileInput) {
       },
       $unset: {
         landingUrl: "",
+      },
+    },
+  );
+
+  const updated = await collection.findOne({ _id: objectId });
+
+  return updated ? serializeProfile(updated) : null;
+}
+
+export async function updateProfilePhoto(
+  id: string,
+  input: { profilePhotoUrl: string; profilePhotoFileId: string },
+) {
+  const objectId = parseObjectId(id);
+
+  if (!objectId) {
+    return null;
+  }
+
+  const collection = await getProfilesCollection();
+  const now = new Date();
+
+  await collection.updateOne(
+    { _id: objectId },
+    {
+      $set: {
+        profilePhotoUrl: input.profilePhotoUrl,
+        profilePhotoFileId: input.profilePhotoFileId,
+        updatedAt: now,
+      },
+    },
+  );
+
+  const updated = await collection.findOne({ _id: objectId });
+
+  return updated ? serializeProfile(updated) : null;
+}
+
+export async function clearProfilePhoto(id: string) {
+  const objectId = parseObjectId(id);
+
+  if (!objectId) {
+    return null;
+  }
+
+  const collection = await getProfilesCollection();
+  const now = new Date();
+
+  await collection.updateOne(
+    { _id: objectId },
+    {
+      $set: {
+        profilePhotoUrl: "",
+        profilePhotoFileId: "",
+        updatedAt: now,
       },
     },
   );
