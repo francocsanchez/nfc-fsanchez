@@ -1,6 +1,8 @@
-import { Download, MapPin, MessageCircle } from "lucide-react";
+import Image from "next/image";
+import { Download, FileText, MapPin, MessageCircle } from "lucide-react";
 import { notFound } from "next/navigation";
 
+import { getCatalogSettings } from "@/lib/catalog";
 import { getPublicProfileBySlug } from "@/lib/profiles";
 
 function getWhatsappUrl(whatsapp: string) {
@@ -37,7 +39,11 @@ export default async function PublicProfilePage({
 
   const initials = getInitials(profile.name);
   const whatsappUrl = getWhatsappUrl(profile.whatsapp);
-  const contactCardUrl = `/api/contacts/${profile.slug}`;
+  const contactCardUrl = `/api/credenciales/${profile.slug}/contact-click`;
+  const whatsappTrackingUrl = `/api/credenciales/${profile.slug}/whatsapp-click`;
+  const catalog =
+    profile.rol === "vendedor" ? await getCatalogSettings() : { items: [] };
+  const showCatalog = profile.rol === "vendedor" && catalog.items.length > 0;
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -91,7 +97,7 @@ export default async function PublicProfilePage({
 
                 {whatsappUrl ? (
                   <a
-                    href={whatsappUrl}
+                    href={whatsappTrackingUrl}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex min-h-14 items-center justify-center gap-3 border border-foreground bg-foreground px-4 text-sm font-medium text-background transition hover:bg-background hover:text-foreground"
@@ -106,6 +112,47 @@ export default async function PublicProfilePage({
                 )}
               </div>
             </div>
+
+            {showCatalog ? (
+              <div className="border-t border-border pt-5">
+                <div className="space-y-3">
+                  {catalog.items.map((item, index) => (
+                    <div
+                      key={index}
+                      className="grid grid-cols-[5.5rem_minmax(0,1fr)_2.75rem] items-center gap-3 px-1 py-2"
+                    >
+                      <div className="overflow-hidden border border-border bg-muted">
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.name}
+                          width={580}
+                          height={280}
+                          unoptimized
+                          className="aspect-[29/14] h-auto w-full object-cover"
+                        />
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="line-clamp-2 break-words text-sm font-medium text-foreground sm:text-base">
+                          {item.name}
+                        </p>
+                      </div>
+
+                      <a
+                        href={item.technicalSheetUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex h-11 w-11 items-center justify-center border border-border bg-muted text-foreground transition hover:border-foreground hover:bg-background"
+                        aria-label={`Abrir ficha tecnica de ${item.name}`}
+                      >
+                        <FileText className="h-4 w-4" />
+                        <span className="sr-only">Ficha tecnica</span>
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
         </section>
       </div>

@@ -13,6 +13,7 @@ import {
   createProfileSchema,
   type CreateProfileInput,
   type Profile,
+  profileRoleSchema,
   type UpdateProfileInput,
   updateProfileSchema,
 } from "@/lib/profile-schema";
@@ -26,6 +27,7 @@ export type ProfileDocument = {
   googleMapsUrl: string;
   email: string;
   whatsapp: string;
+  rol?: "general" | "vendedor";
   slug: string;
   isActive: boolean;
   createdAt: Date;
@@ -63,6 +65,7 @@ function serializeProfile(profile: WithId<ProfileDocument>): Profile {
     googleMapsUrl: profile.googleMapsUrl ?? "",
     email: profile.email,
     whatsapp: profile.whatsapp ?? "",
+    rol: profileRoleSchema.parse(profile.rol ?? "general"),
     slug: profile.slug,
     isActive: profile.isActive,
     createdAt: profile.createdAt.toISOString(),
@@ -192,6 +195,7 @@ export async function updateProfile(id: string, input: UpdateProfileInput) {
         googleMapsUrl: data.googleMapsUrl,
         email: data.email,
         whatsapp: data.whatsapp,
+        rol: data.rol,
         isActive: data.isActive,
         updatedAt: now,
       },

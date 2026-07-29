@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const profileRoleSchema = z.enum(["general", "vendedor"]);
+
 function optionalTextField(max: number) {
   return z
     .string()
@@ -51,6 +53,7 @@ export const createProfileSchema = z.object({
   googleMapsUrl: optionalUrlField,
   email: z.string().trim().email("Ingresa un email valido").max(160),
   whatsapp: whatsappSchema,
+  rol: profileRoleSchema.default("general"),
 });
 
 export const updateProfileSchema = createProfileSchema.extend({
@@ -68,6 +71,7 @@ export type Profile = {
   googleMapsUrl: string;
   email: string;
   whatsapp: string;
+  rol: z.infer<typeof profileRoleSchema>;
   slug: string;
   isActive: boolean;
   createdAt: string;

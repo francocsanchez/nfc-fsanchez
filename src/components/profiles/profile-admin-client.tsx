@@ -1,32 +1,37 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { startTransition, useState } from "react";
+import { Download, Upload } from "lucide-react";
+import { startTransition, useRef, useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { type CatalogSettings } from "@/lib/catalog-schema";
+import { getPublicProfileUrl } from "@/lib/public-url";
 import {
   createProfileSchema,
+  profileRoleSchema,
   type CreateProfileInput,
   type Profile,
   type UpdateProfileInput,
   updateProfileSchema,
 } from "@/lib/profile-schema";
-import { getPublicProfileUrl } from "@/lib/public-url";
 
 type ProfileAdminClientProps = {
   initialProfiles: Profile[];
+  initialCatalog: CatalogSettings;
 };
 
 type FieldErrors = Partial<
   Record<
-    "name" | "jobTitle" | "address" | "googleMapsUrl" | "email" | "whatsapp",
+    "name" | "jobTitle" | "address" | "googleMapsUrl" | "email" | "whatsapp" | "rol",
     string[]
   >
 >;
 
 type ApiErrorResponse = {
   error?: string;
-  fieldErrors?: FieldErrors;
+  fieldErrors?: Record<string, string[] | undefined>;
 };
 
 type ChangePasswordValues = {
@@ -42,7 +47,13 @@ type FormValues = {
   googleMapsUrl: string;
   email: string;
   whatsapp: string;
+  rol: Profile["rol"];
   isActive: boolean;
+};
+
+const roleLabels: Record<Profile["rol"], string> = {
+  general: "General",
+  vendedor: "Vendedor",
 };
 
 const emptyValues: FormValues = {
@@ -52,6 +63,7 @@ const emptyValues: FormValues = {
   googleMapsUrl: "",
   email: "",
   whatsapp: "",
+  rol: "general",
   isActive: true,
 };
 
@@ -135,198 +147,227 @@ function ProfileModal({
               onSubmit();
             }}
           >
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <div className="space-y-1.5">
-              <label htmlFor="profile-name" className="text-sm font-medium">
-                Nombre
-              </label>
-              <input
-                id="profile-name"
-                value={values.name}
-                onChange={(event) => onChange("name", event.target.value)}
-                className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
-                placeholder="Franco Sanchez"
-                autoComplete="name"
-              />
-              {errors.name?.[0] ? (
-                <p className="text-sm text-destructive">{errors.name[0]}</p>
-              ) : null}
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="profile-job-title" className="text-sm font-medium">
-                Puesto de trabajo
-              </label>
-              <input
-                id="profile-job-title"
-                value={values.jobTitle}
-                onChange={(event) => onChange("jobTitle", event.target.value)}
-                className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
-                placeholder="Creative Director"
-                autoComplete="organization-title"
-              />
-              {errors.jobTitle?.[0] ? (
-                <p className="text-sm text-destructive">{errors.jobTitle[0]}</p>
-              ) : null}
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="profile-address" className="text-sm font-medium">
-                Direccion
-              </label>
-              <input
-                id="profile-address"
-                value={values.address}
-                onChange={(event) => onChange("address", event.target.value)}
-                className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
-                placeholder="Buenos Aires, Argentina"
-                autoComplete="street-address"
-              />
-              {errors.address?.[0] ? (
-                <p className="text-sm text-destructive">{errors.address[0]}</p>
-              ) : null}
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="profile-google-maps-url" className="text-sm font-medium">
-                Link Google Maps
-              </label>
-              <input
-                id="profile-google-maps-url"
-                type="url"
-                value={values.googleMapsUrl}
-                onChange={(event) => onChange("googleMapsUrl", event.target.value)}
-                className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
-                placeholder="https://maps.google.com/..."
-                autoComplete="url"
-              />
-              <p className="text-xs text-muted-foreground">
-                Opcional. Si lo completas, la direccion sera clickeable en la landing.
-              </p>
-              {errors.googleMapsUrl?.[0] ? (
-                <p className="text-sm text-destructive">
-                  {errors.googleMapsUrl[0]}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="profile-email" className="text-sm font-medium">
-                Email
-              </label>
-              <input
-                id="profile-email"
-                type="email"
-                value={values.email}
-                onChange={(event) => onChange("email", event.target.value)}
-                className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
-                placeholder="fsanchez@gmail.com"
-                autoComplete="email"
-              />
-              {errors.email?.[0] ? (
-                <p className="text-sm text-destructive">{errors.email[0]}</p>
-              ) : null}
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="profile-whatsapp" className="text-sm font-medium">
-                WhatsApp
-              </label>
-              <input
-                id="profile-whatsapp"
-                inputMode="numeric"
-                value={values.whatsapp}
-                onChange={(event) => onChange("whatsapp", event.target.value)}
-                className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
-                placeholder="1123456789"
-                autoComplete="tel"
-              />
-              <p className="text-xs text-muted-foreground">
-                Opcional. Si lo completas, ingresa solo codigo de area y numero.
-              </p>
-              {errors.whatsapp?.[0] ? (
-                <p className="text-sm text-destructive">{errors.whatsapp[0]}</p>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-border bg-muted/50 px-4 py-3">
-            <p className="text-sm font-medium">Link del tag NFC</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Se genera automaticamente a partir del slug publico del perfil.
-            </p>
-          </div>
-
-          {mode === "edit" && slug ? (
-            <div className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               <div className="space-y-1.5">
-              <label htmlFor="profile-slug" className="text-sm font-medium">
-                Slug publico
-              </label>
-              <input
-                id="profile-slug"
-                value={slug}
-                readOnly
-                className="w-full rounded-2xl border border-input bg-muted px-4 py-3 text-sm text-muted-foreground outline-none"
-              />
-              <p className="text-xs text-muted-foreground">
-                El slug queda fijo para no invalidar los tags NFC ya grabados.
-              </p>
-              </div>
-              <div className="space-y-1.5">
-                <label htmlFor="profile-public-url" className="text-sm font-medium">
-                  URL final del tag
+                <label htmlFor="profile-name" className="text-sm font-medium">
+                  Nombre
                 </label>
                 <input
-                  id="profile-public-url"
-                  value={publicUrl ?? ""}
-                  readOnly
-                  className="w-full rounded-2xl border border-input bg-muted px-4 py-3 text-sm text-muted-foreground outline-none"
+                  id="profile-name"
+                  value={values.name}
+                  onChange={(event) => onChange("name", event.target.value)}
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+                  placeholder="Franco Sanchez"
+                  autoComplete="name"
                 />
+                {errors.name?.[0] ? (
+                  <p className="text-sm text-destructive">{errors.name[0]}</p>
+                ) : null}
               </div>
-            </div>
-          ) : null}
 
-          {mode === "edit" ? (
-            <label className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3">
-              <div>
-                <p className="text-sm font-medium">Perfil activo</p>
+              <div className="space-y-1.5">
+                <label htmlFor="profile-role" className="text-sm font-medium">
+                  Rol
+                </label>
+                <select
+                  id="profile-role"
+                  value={values.rol}
+                  onChange={(event) => onChange("rol", event.target.value)}
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+                >
+                  {profileRoleSchema.options.map((role) => (
+                    <option key={role} value={role}>
+                      {roleLabels[role]}
+                    </option>
+                  ))}
+                </select>
+                {errors.rol?.[0] ? (
+                  <p className="text-sm text-destructive">{errors.rol[0]}</p>
+                ) : null}
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="profile-job-title" className="text-sm font-medium">
+                  Puesto de trabajo
+                </label>
+                <input
+                  id="profile-job-title"
+                  value={values.jobTitle}
+                  onChange={(event) => onChange("jobTitle", event.target.value)}
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+                  placeholder="Creative Director"
+                  autoComplete="organization-title"
+                />
+                {errors.jobTitle?.[0] ? (
+                  <p className="text-sm text-destructive">{errors.jobTitle[0]}</p>
+                ) : null}
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="profile-address" className="text-sm font-medium">
+                  Direccion
+                </label>
+                <input
+                  id="profile-address"
+                  value={values.address}
+                  onChange={(event) => onChange("address", event.target.value)}
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+                  placeholder="Buenos Aires, Argentina"
+                  autoComplete="street-address"
+                />
+                {errors.address?.[0] ? (
+                  <p className="text-sm text-destructive">{errors.address[0]}</p>
+                ) : null}
+              </div>
+
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="profile-google-maps-url"
+                  className="text-sm font-medium"
+                >
+                  Link Google Maps
+                </label>
+                <input
+                  id="profile-google-maps-url"
+                  type="url"
+                  value={values.googleMapsUrl}
+                  onChange={(event) =>
+                    onChange("googleMapsUrl", event.target.value)
+                  }
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+                  placeholder="https://maps.google.com/..."
+                  autoComplete="url"
+                />
                 <p className="text-xs text-muted-foreground">
-                  Si lo desactivas, la URL publica devolvera 404.
+                  Opcional. Si lo completas, la direccion sera clickeable en la landing.
                 </p>
+                {errors.googleMapsUrl?.[0] ? (
+                  <p className="text-sm text-destructive">
+                    {errors.googleMapsUrl[0]}
+                  </p>
+                ) : null}
               </div>
-              <input
-                type="checkbox"
-                checked={values.isActive}
-                onChange={(event) => onChange("isActive", event.target.checked)}
-                className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
-              />
-            </label>
-          ) : null}
 
-          {submitError ? (
-            <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-              {submitError}
+              <div className="space-y-1.5">
+                <label htmlFor="profile-email" className="text-sm font-medium">
+                  Email
+                </label>
+                <input
+                  id="profile-email"
+                  type="email"
+                  value={values.email}
+                  onChange={(event) => onChange("email", event.target.value)}
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+                  placeholder="fsanchez@gmail.com"
+                  autoComplete="email"
+                />
+                {errors.email?.[0] ? (
+                  <p className="text-sm text-destructive">{errors.email[0]}</p>
+                ) : null}
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="profile-whatsapp" className="text-sm font-medium">
+                  WhatsApp
+                </label>
+                <input
+                  id="profile-whatsapp"
+                  inputMode="numeric"
+                  value={values.whatsapp}
+                  onChange={(event) => onChange("whatsapp", event.target.value)}
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+                  placeholder="1123456789"
+                  autoComplete="tel"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Opcional. Si lo completas, ingresa solo codigo de area y numero.
+                </p>
+                {errors.whatsapp?.[0] ? (
+                  <p className="text-sm text-destructive">{errors.whatsapp[0]}</p>
+                ) : null}
+              </div>
             </div>
-          ) : null}
 
-          <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
-            <Button
-              variant="outline"
-              type="button"
-              onClick={onClose}
-              disabled={submitting}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting
-                ? "Guardando..."
-                : mode === "create"
-                  ? "Crear perfil"
-                  : "Guardar cambios"}
-            </Button>
-          </div>
+            <div className="rounded-2xl border border-border bg-muted/50 px-4 py-3">
+              <p className="text-sm font-medium">Link del tag NFC</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Se genera automaticamente a partir del slug publico del perfil.
+              </p>
+            </div>
+
+            {mode === "edit" && slug ? (
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="profile-slug" className="text-sm font-medium">
+                    Slug publico
+                  </label>
+                  <input
+                    id="profile-slug"
+                    value={slug}
+                    readOnly
+                    className="w-full rounded-2xl border border-input bg-muted px-4 py-3 text-sm text-muted-foreground outline-none"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    El slug queda fijo para no invalidar los tags NFC ya grabados.
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="profile-public-url"
+                    className="text-sm font-medium"
+                  >
+                    URL final del tag
+                  </label>
+                  <input
+                    id="profile-public-url"
+                    value={publicUrl ?? ""}
+                    readOnly
+                    className="w-full rounded-2xl border border-input bg-muted px-4 py-3 text-sm text-muted-foreground outline-none"
+                  />
+                </div>
+              </div>
+            ) : null}
+
+            {mode === "edit" ? (
+              <label className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium">Perfil activo</p>
+                  <p className="text-xs text-muted-foreground">
+                    Si lo desactivas, la URL publica devolvera 404.
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={values.isActive}
+                  onChange={(event) => onChange("isActive", event.target.checked)}
+                  className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+                />
+              </label>
+            ) : null}
+
+            {submitError ? (
+              <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {submitError}
+              </div>
+            ) : null}
+
+            <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={onClose}
+                disabled={submitting}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={submitting}>
+                {submitting
+                  ? "Guardando..."
+                  : mode === "create"
+                    ? "Crear perfil"
+                    : "Guardar cambios"}
+              </Button>
+            </div>
           </form>
         </div>
       </div>
@@ -390,77 +431,74 @@ function ChangePasswordModal({
               onSubmit();
             }}
           >
-          <div className="space-y-1.5">
-            <label
-              htmlFor="current-password"
-              className="text-sm font-medium"
-            >
-              Contrasena actual
-            </label>
-            <input
-              id="current-password"
-              type="password"
-              value={values.currentPassword}
-              onChange={(event) =>
-                onChange("currentPassword", event.target.value)
-              }
-              className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
-              autoComplete="current-password"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label htmlFor="new-password" className="text-sm font-medium">
-              Nueva contrasena
-            </label>
-            <input
-              id="new-password"
-              type="password"
-              value={values.newPassword}
-              onChange={(event) => onChange("newPassword", event.target.value)}
-              className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
-              autoComplete="new-password"
-            />
-            <p className="text-xs text-muted-foreground">
-              Debe tener al menos 8 caracteres.
-            </p>
-          </div>
-
-          <div className="space-y-1.5">
-            <label htmlFor="confirm-password" className="text-sm font-medium">
-              Confirmar nueva contrasena
-            </label>
-            <input
-              id="confirm-password"
-              type="password"
-              value={values.confirmPassword}
-              onChange={(event) =>
-                onChange("confirmPassword", event.target.value)
-              }
-              className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
-              autoComplete="new-password"
-            />
-          </div>
-
-          {submitError ? (
-            <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-              {submitError}
+            <div className="space-y-1.5">
+              <label htmlFor="current-password" className="text-sm font-medium">
+                Contrasena actual
+              </label>
+              <input
+                id="current-password"
+                type="password"
+                value={values.currentPassword}
+                onChange={(event) =>
+                  onChange("currentPassword", event.target.value)
+                }
+                className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+                autoComplete="current-password"
+              />
             </div>
-          ) : null}
 
-          <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
-            <Button
-              variant="outline"
-              type="button"
-              onClick={onClose}
-              disabled={submitting}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Actualizando..." : "Guardar contrasena"}
-            </Button>
-          </div>
+            <div className="space-y-1.5">
+              <label htmlFor="new-password" className="text-sm font-medium">
+                Nueva contrasena
+              </label>
+              <input
+                id="new-password"
+                type="password"
+                value={values.newPassword}
+                onChange={(event) => onChange("newPassword", event.target.value)}
+                className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+                autoComplete="new-password"
+              />
+              <p className="text-xs text-muted-foreground">
+                Debe tener al menos 8 caracteres.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label htmlFor="confirm-password" className="text-sm font-medium">
+                Confirmar nueva contrasena
+              </label>
+              <input
+                id="confirm-password"
+                type="password"
+                value={values.confirmPassword}
+                onChange={(event) =>
+                  onChange("confirmPassword", event.target.value)
+                }
+                className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+                autoComplete="new-password"
+              />
+            </div>
+
+            {submitError ? (
+              <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {submitError}
+              </div>
+            ) : null}
+
+            <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={onClose}
+                disabled={submitting}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={submitting}>
+                {submitting ? "Actualizando..." : "Guardar contrasena"}
+              </Button>
+            </div>
           </form>
         </div>
       </div>
@@ -470,8 +508,10 @@ function ChangePasswordModal({
 
 export function ProfileAdminClient({
   initialProfiles,
+  initialCatalog,
 }: ProfileAdminClientProps) {
   const [profiles, setProfiles] = useState(initialProfiles);
+  const [catalog, setCatalog] = useState(initialCatalog);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
@@ -486,6 +526,10 @@ export function ProfileAdminClient({
     useState<ChangePasswordValues>(emptyPasswordValues);
   const [passwordSubmitting, setPasswordSubmitting] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [catalogActionError, setCatalogActionError] = useState<string | null>(null);
+  const [catalogDownloading, setCatalogDownloading] = useState(false);
+  const [catalogUploading, setCatalogUploading] = useState(false);
+  const catalogFileInputRef = useRef<HTMLInputElement | null>(null);
 
   function openCreateModal() {
     setModalMode("create");
@@ -506,6 +550,7 @@ export function ProfileAdminClient({
       googleMapsUrl: profile.googleMapsUrl,
       email: profile.email,
       whatsapp: profile.whatsapp,
+      rol: profile.rol,
       isActive: profile.isActive,
     });
     setFieldErrors({});
@@ -555,6 +600,20 @@ export function ProfileAdminClient({
     });
   }
 
+  function syncCatalog(nextCatalog: CatalogSettings) {
+    startTransition(() => {
+      setCatalog(nextCatalog);
+    });
+  }
+
+  function openCatalogUpload() {
+    if (catalogUploading) {
+      return;
+    }
+
+    catalogFileInputRef.current?.click();
+  }
+
   async function refreshProfiles() {
     const response = await fetch("/api/profiles", { cache: "no-store" });
     const data = (await response.json()) as { profiles?: Profile[] } & ApiErrorResponse;
@@ -580,6 +639,7 @@ export function ProfileAdminClient({
             googleMapsUrl: formValues.googleMapsUrl,
             email: formValues.email,
             whatsapp: formValues.whatsapp,
+            rol: formValues.rol,
           } satisfies CreateProfileInput)
         : ({
             name: formValues.name,
@@ -588,6 +648,7 @@ export function ProfileAdminClient({
             googleMapsUrl: formValues.googleMapsUrl,
             email: formValues.email,
             whatsapp: formValues.whatsapp,
+            rol: formValues.rol,
             isActive: formValues.isActive,
           } satisfies UpdateProfileInput);
 
@@ -622,7 +683,7 @@ export function ProfileAdminClient({
       };
 
       if (!response.ok) {
-        setFieldErrors(data.fieldErrors ?? {});
+        setFieldErrors((data.fieldErrors ?? {}) as FieldErrors);
         setSubmitError(data.error ?? "No se pudo guardar el perfil.");
         return;
       }
@@ -663,6 +724,7 @@ export function ProfileAdminClient({
           googleMapsUrl: profile.googleMapsUrl,
           email: profile.email,
           whatsapp: profile.whatsapp,
+          rol: profile.rol,
           isActive,
         } satisfies UpdateProfileInput),
       });
@@ -683,6 +745,76 @@ export function ProfileAdminClient({
       setSubmitError(getErrorMessage(error));
     } finally {
       setListBusyId(null);
+    }
+  }
+
+  async function downloadCatalogExcel() {
+    setCatalogActionError(null);
+    setSuccessMessage(null);
+    setCatalogDownloading(true);
+
+    try {
+      const response = await fetch("/api/catalog/excel", {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as
+          | { error?: string }
+          | null;
+
+        throw new Error(data?.error ?? "No se pudo descargar el catalogo.");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "catalogo-vendedores.xlsx";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      setCatalogActionError(getErrorMessage(error));
+    } finally {
+      setCatalogDownloading(false);
+    }
+  }
+
+  async function uploadCatalogExcel(file: File) {
+    setCatalogActionError(null);
+    setSuccessMessage(null);
+    setCatalogUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/catalog/excel", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = (await response.json()) as ApiErrorResponse & {
+        catalog?: CatalogSettings;
+      };
+
+      if (!response.ok || !data.catalog) {
+        throw new Error(data.error ?? "No se pudo importar el catalogo.");
+      }
+
+      syncCatalog(data.catalog);
+      setSuccessMessage("Catalogo actualizado desde Excel.");
+    } catch (error) {
+      setCatalogActionError(getErrorMessage(error));
+    } finally {
+      setCatalogUploading(false);
+
+      if (catalogFileInputRef.current) {
+        catalogFileInputRef.current.value = "";
+      }
     }
   }
 
@@ -758,12 +890,18 @@ export function ProfileAdminClient({
           <div>
             <h1 className="text-2xl font-semibold sm:text-3xl">Perfiles NFC</h1>
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground sm:text-base">
-              Administra los perfiles que luego se mostraran al escanear cada
-              tag NFC. El slug se genera solo y queda fijo.
+              Administra perfiles, define su rol y controla el catalogo compartido
+              que se muestra en los vendedores.
             </p>
           </div>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
+          <Link
+            href="/credenciales/perfiles/metricas"
+            className={buttonVariants({ variant: "outline", size: "lg" })}
+          >
+            Ver metricas
+          </Link>
           <Button variant="outline" size="lg" onClick={openPasswordModal}>
             Cambiar contrasena
           </Button>
@@ -785,12 +923,102 @@ export function ProfileAdminClient({
         </div>
       ) : null}
 
+      {catalogActionError ? (
+        <div className="rounded-3xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {catalogActionError}
+        </div>
+      ) : null}
+
+      <section className="rounded-3xl border border-border bg-card p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold">Catalogo de vendedores</h2>
+            <p className="max-w-2xl text-sm text-muted-foreground">
+              Todos los perfiles con rol vendedor comparten estos productos en su
+              tarjeta publica.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              ref={catalogFileInputRef}
+              type="file"
+              accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+
+                if (file) {
+                  void uploadCatalogExcel(file);
+                }
+              }}
+            />
+            <Button
+              variant="outline"
+              onClick={downloadCatalogExcel}
+              disabled={catalogDownloading || catalogUploading}
+            >
+              <Download className="h-4 w-4" />
+              {catalogDownloading ? "Descargando..." : "Descargar Excel"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={openCatalogUpload}
+              disabled={catalogUploading || catalogDownloading}
+            >
+              <Upload className="h-4 w-4" />
+              {catalogUploading ? "Subiendo..." : "Subir Excel"}
+            </Button>
+          </div>
+        </div>
+
+        <div className="mt-4 space-y-3">
+          {catalog.items.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-border bg-background px-4 py-6 text-sm text-muted-foreground">
+              No hay productos cargados todavia.
+            </div>
+          ) : (
+            catalog.items.map((item, index) => (
+              <div
+                key={index}
+                className="grid gap-4 rounded-3xl border border-border bg-background p-4 sm:grid-cols-[168px_minmax(0,1fr)_auto] sm:items-center"
+              >
+                <div className="overflow-hidden rounded-2xl border border-border bg-muted">
+                  <Image
+                    src={item.imageUrl}
+                    alt={item.name}
+                    width={580}
+                    height={280}
+                    unoptimized
+                    className="aspect-[29/14] h-auto w-full object-cover"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    Producto {index + 1}
+                  </p>
+                  <p className="truncate text-base font-medium">{item.name}</p>
+                </div>
+                <a
+                  href={item.technicalSheetUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-border px-4 text-sm font-medium transition hover:border-foreground hover:bg-muted"
+                >
+                  Ver ficha
+                </a>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
       <section className="overflow-hidden rounded-3xl border border-border bg-card">
         <div className="overflow-x-auto">
           <table className="min-w-full text-left">
             <thead className="bg-muted/60 text-xs uppercase tracking-[0.16em] text-muted-foreground">
               <tr>
                 <th className="px-4 py-4 font-medium">Perfil</th>
+                <th className="px-4 py-4 font-medium">Rol</th>
                 <th className="px-4 py-4 font-medium">Slug</th>
                 <th className="px-4 py-4 font-medium">Link del tag</th>
                 <th className="px-4 py-4 font-medium">Estado</th>
@@ -801,7 +1029,7 @@ export function ProfileAdminClient({
               {profiles.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="px-4 py-10 text-center text-sm text-muted-foreground"
                   >
                     Todavia no hay perfiles cargados.
@@ -814,10 +1042,7 @@ export function ProfileAdminClient({
                 const publicUrl = getPublicProfileUrl(profile.slug);
 
                 return (
-                  <tr
-                    key={profile.id}
-                    className="border-t border-border align-top"
-                  >
+                  <tr key={profile.id} className="border-t border-border align-top">
                     <td className="px-4 py-4">
                       <div className="space-y-1">
                         <p className="font-medium">{profile.name}</p>
@@ -841,9 +1066,14 @@ export function ProfileAdminClient({
                           {profile.email}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          WhatsApp: {profile.whatsapp}
+                          WhatsApp: {profile.whatsapp || "Sin WhatsApp"}
                         </p>
                       </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className="inline-flex rounded-full border border-border bg-background px-3 py-1 text-xs font-medium">
+                        {roleLabels[profile.rol]}
+                      </span>
                     </td>
                     <td className="px-4 py-4">
                       <Link
