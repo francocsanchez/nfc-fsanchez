@@ -137,7 +137,7 @@ export default async function PublicProfilePage({
                       </a>
                     </DetailRow>
                   ) : null}
-                  {profile.googleMapsUrl  ? (
+                  {profile.googleMapsUrl ? (
                     <DetailRow icon={<MapPin className="h-4 w-4" />}>
                       <a
                         href={profile.googleMapsUrl}
@@ -146,8 +146,9 @@ export default async function PublicProfilePage({
                         className="underline decoration-border underline-offset-4 transition hover:text-foreground"
                       >
                         {profile.address}
-                      </a>             
-                  </DetailRow> ) : null}
+                      </a>
+                    </DetailRow>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -244,6 +245,12 @@ export default async function PublicProfilePage({
                     </div>
                   </div>
                 ) : null}
+
+                <footer className="border-t border-border pt-5">
+                  <p className="text-center text-[0.72rem] uppercase tracking-[0.28em] text-muted-foreground">
+                    BY <span className="font-semibold text-foreground">ContactoActivo</span>
+                  </p>
+                </footer>
               </div>
             </div>
           </div>
