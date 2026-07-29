@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Download, Globe, Upload } from "lucide-react";
+import { Download, Upload } from "lucide-react";
 import { startTransition, useRef, useState } from "react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -116,8 +116,6 @@ function ProfileModal({
   photoSubmitting,
   photoError,
   submitError,
-  slug,
-  publicUrl,
   profilePhotoUrl,
   updatedAt,
   onChange,
@@ -134,8 +132,6 @@ function ProfileModal({
   photoSubmitting: boolean;
   photoError: string | null;
   submitError: string | null;
-  slug?: string;
-  publicUrl?: string;
   profilePhotoUrl?: string;
   updatedAt?: string;
   onChange: (field: keyof FormValues, value: string | boolean) => void;
@@ -419,63 +415,6 @@ function ProfileModal({
                 ) : null}
               </div>
             </div>
-
-            <div className="rounded-2xl border border-border bg-muted/50 px-4 py-3">
-              <p className="text-sm font-medium">Link del tag NFC</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Se genera automaticamente a partir del slug publico del perfil.
-              </p>
-            </div>
-
-            {mode === "edit" && slug ? (
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label htmlFor="profile-slug" className="text-sm font-medium">
-                    Slug publico
-                  </label>
-                  <input
-                    id="profile-slug"
-                    value={slug}
-                    readOnly
-                    className="w-full rounded-2xl border border-input bg-muted px-4 py-3 text-sm text-muted-foreground outline-none"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    El slug queda fijo para no invalidar los tags NFC ya grabados.
-                  </p>
-                </div>
-                <div className="space-y-1.5">
-                  <label
-                    htmlFor="profile-public-url"
-                    className="text-sm font-medium"
-                  >
-                    URL final del tag
-                  </label>
-                  <input
-                    id="profile-public-url"
-                    value={publicUrl ?? ""}
-                    readOnly
-                    className="w-full rounded-2xl border border-input bg-muted px-4 py-3 text-sm text-muted-foreground outline-none"
-                  />
-                </div>
-              </div>
-            ) : null}
-
-            {mode === "edit" ? (
-              <label className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3">
-                <div>
-                  <p className="text-sm font-medium">Perfil activo</p>
-                  <p className="text-xs text-muted-foreground">
-                    Si lo desactivas, la URL publica devolvera 404.
-                  </p>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={values.isActive}
-                  onChange={(event) => onChange("isActive", event.target.checked)}
-                  className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
-                />
-              </label>
-            ) : null}
 
             {submitError ? (
               <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -1281,42 +1220,7 @@ export function ProfileAdminClient({
                 return (
                   <tr key={profile.id} className="border-t border-border align-top">
                     <td className="px-4 py-4">
-                      <div className="space-y-1">
-                        <p className="font-medium">{profile.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {profile.jobTitle}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {profile.address}
-                        </p>
-                        {profile.googleMapsUrl ? (
-                          <a
-                            href={profile.googleMapsUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-sm text-primary underline-offset-4 hover:underline"
-                          >
-                            Abrir en Google Maps
-                          </a>
-                        ) : null}
-                        {profile.websiteUrl ? (
-                          <a
-                            href={profile.websiteUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-2 text-sm text-primary underline-offset-4 hover:underline"
-                          >
-                            <Globe className="h-4 w-4" />
-                            Sitio web
-                          </a>
-                        ) : null}
-                        <p className="text-sm text-muted-foreground">
-                          {profile.email}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          WhatsApp: {profile.whatsapp || "Sin WhatsApp"}
-                        </p>
-                      </div>
+                      <p className="font-medium">{profile.name}</p>
                     </td>
                     <td className="px-4 py-4">
                       <span className="inline-flex rounded-full border border-border bg-background px-3 py-1 text-xs font-medium">
@@ -1337,7 +1241,8 @@ export function ProfileAdminClient({
                         href={publicUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="line-clamp-2 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                        className="block max-w-[14rem] truncate text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                        title={publicUrl}
                       >
                         {publicUrl}
                       </a>
@@ -1354,20 +1259,22 @@ export function ProfileAdminClient({
                       </span>
                     </td>
                     <td className="px-4 py-4">
-                      <div className="flex flex-wrap gap-2">
+                      <div className="inline-flex items-center overflow-hidden rounded-2xl border border-border">
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={() => openEditModal(profile)}
                           disabled={busy}
+                          className="rounded-none border-r border-border"
                         >
                           Editar
                         </Button>
                         <Button
-                          variant={profile.isActive ? "destructive" : "secondary"}
+                          variant="ghost"
                           size="sm"
                           onClick={() => toggleActive(profile, !profile.isActive)}
                           disabled={busy}
+                          className="rounded-none"
                         >
                           {busy
                             ? "Procesando..."
@@ -1394,10 +1301,6 @@ export function ProfileAdminClient({
         photoSubmitting={photoSubmitting}
         photoError={photoError}
         submitError={submitError}
-        slug={selectedProfile?.slug}
-        publicUrl={
-          selectedProfile ? getPublicProfileUrl(selectedProfile.slug) : undefined
-        }
         profilePhotoUrl={selectedProfile?.profilePhotoUrl}
         updatedAt={selectedProfile?.updatedAt}
         onChange={updateFormValue}

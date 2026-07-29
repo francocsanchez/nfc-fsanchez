@@ -19,9 +19,7 @@ export default async function CredentialsProfilesMetricsPage() {
             <h1 className="text-2xl font-semibold sm:text-3xl">
               Metricas de credenciales
             </h1>
-            <p className="mt-1 max-w-2xl text-sm text-muted-foreground sm:text-base">
-              Revisa los clicks mensuales por slug en guardar contacto y WhatsApp.
-            </p>
+            
           </div>
         </div>
         <Link
@@ -38,10 +36,10 @@ export default async function CredentialsProfilesMetricsPage() {
             <thead className="bg-muted/60 text-xs uppercase tracking-[0.16em] text-muted-foreground">
               <tr>
                 <th className="px-4 py-4 font-medium">Slug</th>
-                <th className="px-4 py-4 font-medium">Ano</th>
-                <th className="px-4 py-4 font-medium">Mes</th>
-                <th className="px-4 py-4 font-medium">Guardar contacto</th>
-                <th className="px-4 py-4 font-medium">WhatsApp</th>
+                <th className="px-4 py-4 font-medium text-center">Mes-Año</th>
+             
+                <th className="px-4 py-4 font-medium text-center">Guardar contacto</th>
+                <th className="px-4 py-4 font-medium text-center">WhatsApp</th>
               </tr>
             </thead>
             <tbody>
@@ -62,14 +60,11 @@ export default async function CredentialsProfilesMetricsPage() {
                   className="border-t border-border"
                 >
                   <td className="px-4 py-4 font-medium">{metric.slug}</td>
-                  <td className="px-4 py-4 text-sm text-muted-foreground">
-                    {metric.anio}
+                  <td className="px-4 py-4 text-sm text-muted-foreground text-center">
+                    {metric.mes} - {metric.anio}
                   </td>
-                  <td className="px-4 py-4 text-sm text-muted-foreground">
-                    {metric.mes}
-                  </td>
-                  <td className="px-4 py-4 text-sm">{metric.saveContactClicks}</td>
-                  <td className="px-4 py-4 text-sm">{metric.whatsappClicks}</td>
+                  <td className="px-4 py-4 text-sm text-center">{metric.saveContactClicks}</td>
+                  <td className="px-4 py-4 text-sm text-center">{metric.whatsappClicks}</td>
                 </tr>
               ))}
             </tbody>
