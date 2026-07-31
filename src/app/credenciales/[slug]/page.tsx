@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { getCatalogSettings } from "@/lib/catalog";
 import { getPublicProfileBySlug } from "@/lib/profiles";
 
+export const dynamic = "force-dynamic";
+
 function getWhatsappUrl(whatsapp: string) {
   const digits = whatsapp.replace(/\D/g, "").replace(/^0+/, "");
 
