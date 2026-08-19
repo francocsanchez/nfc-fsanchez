@@ -45,7 +45,16 @@ docker build -t nfc-fsanchez:local .
 docker run --rm -p 3000:3000 ^
   -e DATABASE_MONGO=mongodb://host.docker.internal:27017/nfc_fsanchez ^
   -e NEXT_PUBLIC_APP_URL=http://localhost:3000 ^
+  -e BETTER_AUTH_URL=http://localhost:3000 ^
   -e BETTER_AUTH_SECRET=replace-with-a-random-secret-of-32-chars-or-more ^
+  -e MAIL_APP_NAME=IntraNIC ^
+  -e SMTP_HOST=sandbox.smtp.mailtrap.io ^
+  -e SMTP_PORT=2525 ^
+  -e SMTP_SECURE=false ^
+  -e SMTP_USER=your_smtp_user ^
+  -e SMTP_PASS=your_smtp_password ^
+  -e SMTP_FROM_NAME=IntraNIC ^
+  -e SMTP_FROM_EMAIL=fsanchez@nipponcarsrl.com.ar ^
   -e IMAGEKIT_PUBLIC_KEY=your_public_key ^
   -e IMAGEKIT_PRIVATE_KEY=your_private_key ^
   -e IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your_imagekit_id ^
@@ -73,7 +82,16 @@ Variables recomendadas para el stack:
 ```env
 DATABASE_MONGO=mongodb://admin:TU_PASSWORD@192.168.100.31:27017/nfc-fsanchez?authSource=admin
 NEXT_PUBLIC_APP_URL=https://nfc.tu-dominio.com
+BETTER_AUTH_URL=https://nfc.tu-dominio.com
 BETTER_AUTH_SECRET=genera-un-secreto-largo-y-aleatorio
+MAIL_APP_NAME=IntraNIC
+SMTP_HOST=sandbox.smtp.mailtrap.io
+SMTP_PORT=2525
+SMTP_SECURE=false
+SMTP_USER=tu_smtp_user
+SMTP_PASS=tu_smtp_password
+SMTP_FROM_NAME=IntraNIC
+SMTP_FROM_EMAIL=intranic@tu-dominio.com
 IMAGEKIT_PUBLIC_KEY=tu_public_key
 IMAGEKIT_PRIVATE_KEY=tu_private_key
 IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/tu_imagekit_id
