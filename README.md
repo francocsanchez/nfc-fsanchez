@@ -15,6 +15,14 @@ BETTER_AUTH_SECRET=replace-with-a-random-secret-of-32-chars-or-more
 IMAGEKIT_PUBLIC_KEY=
 IMAGEKIT_PRIVATE_KEY=
 IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/<tu_imagekit_id>
+MAIL_APP_NAME=IntraNIC
+SMTP_HOST=sandbox.smtp.mailtrap.io
+SMTP_PORT=2525
+SMTP_SECURE=false
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM_NAME=IntraNIC
+SMTP_FROM_EMAIL=fsanchez@nipponcarsrl.com.ar
 ```
 
 Comandos:
@@ -76,9 +84,11 @@ IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/tu_imagekit_id
 Las rutas bajo `/admin` ahora usan Better Auth con email y contrasena.
 
 - El login vive en `/login`.
+- La recuperacion de contrasena vive en `/recuperar-password`.
 - `src/proxy.ts` redirige a `/login` cuando no hay sesion valida.
 - `src/app/admin/layout.tsx` y las APIs de administracion vuelven a validar la sesion en servidor.
 - Better Auth usa MongoDB para persistir usuarios, cuentas y sesiones.
+- El envio de recuperacion usa SMTP con `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM_NAME` y `SMTP_FROM_EMAIL`.
 
 Notas:
 

@@ -99,6 +99,7 @@ Carpetas relevantes:
 - Better Auth ya esta integrado en el codigo actual; no asumir un flujo de auth pendiente.
 - La inicializacion de auth vive en `src/lib/auth.ts`.
 - Las validaciones de sesion compartidas viven en `src/lib/auth-session.ts`.
+- La recuperacion de contrasena se apoya en email/password de Better Auth y envio SMTP.
 
 ## UI
 
@@ -111,6 +112,7 @@ Carpetas relevantes:
 - MongoDB soporta `DATABASE_MONGO` o la combinacion `MONGODB_URI` + `MONGODB_DB_NAME`.
 - La URL publica depende de `NEXT_PUBLIC_APP_URL`.
 - Auth puede usar `BETTER_AUTH_URL` y `BETTER_AUTH_SECRET` segun el entorno.
+- El envio de emails requiere `MAIL_APP_NAME`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM_NAME` y `SMTP_FROM_EMAIL`.
 
 ## Comandos
 

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
@@ -110,6 +111,15 @@ export function LoginForm() {
           {error}
         </div>
       ) : null}
+
+      <div className="flex justify-end">
+        <Link
+          href="/recuperar-password"
+          className="text-sm text-muted-foreground transition hover:text-foreground"
+        >
+          Olvide mi contrasena
+        </Link>
+      </div>
 
       <Button type="submit" size="lg" className="w-full" disabled={pending}>
         {pending ? "Ingresando..." : "Ingresar"}
