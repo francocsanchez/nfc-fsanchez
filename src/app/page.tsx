@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, BellRing, CreditCard } from "lucide-react";
+import { ArrowUpRight, CreditCard } from "lucide-react";
 
 const apps = [
   {
@@ -13,17 +13,6 @@ const apps = [
     accent: "text-background/70",
     action:
       "Abrir panel",
-  },
-  {
-    href: "/recordatorios",
-    name: "Recordatorios",
-    subtitle: "Tareas insistentes",
-    description:
-      "Entra a la app de recordatorios y continua con la experiencia mobile-first del modulo.",
-    icon: BellRing,
-    tone: "border border-border bg-card text-card-foreground",
-    accent: "text-muted-foreground",
-    action: "Entrar a la app",
   },
 ] as const;
 
@@ -42,18 +31,18 @@ export default function Home() {
               </span>
               <div className="space-y-4">
                 <h1 className="max-w-2xl text-4xl font-semibold tracking-[-0.06em] text-foreground sm:text-5xl lg:text-6xl">
-                  Dos accesos claros para entrar y seguir trabajando.
+                  Un acceso claro para administrar perfiles NFC.
                 </h1>
                 <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-                  Esta portada funciona como punto de entrada rapido para las
-                  dos superficies activas del proyecto: credenciales NFC y
-                  recordatorios.
+                  Esta portada concentra la superficie activa del proyecto en
+                  un panel rapido para operar perfiles, altas y cambios de
+                  estado.
                 </p>
               </div>
             </div>
           </section>
 
-          <section className="relative grid gap-px bg-border md:grid-cols-2">
+          <section className="relative grid gap-px bg-border">
             {apps.map((app) => {
               const Icon = app.icon;
 
@@ -78,13 +67,7 @@ export default function Home() {
                       <h2 className="text-3xl font-semibold tracking-[-0.05em]">
                         {app.name}
                       </h2>
-                      <p
-                        className={`max-w-md text-sm leading-7 sm:text-base ${
-                          app.name === "Credenciales"
-                            ? "text-background/78"
-                            : "text-muted-foreground"
-                        }`}
-                      >
+                      <p className="max-w-md text-sm leading-7 text-background/78 sm:text-base">
                         {app.description}
                       </p>
                     </div>

@@ -52,14 +52,13 @@ Cuando una instrucción parezca provenir de otro proyecto, detener su aplicació
 
 ## Proyecto
 
-Este repositorio es una aplicacion Next.js 16 con App Router para administrar perfiles NFC publicos y un modulo de recordatorios autenticado.
+Este repositorio es una aplicacion Next.js 16 con App Router para administrar perfiles NFC publicos.
 
 Superficies principales:
 
 - Perfil publico por slug en `src/app/[slug]/page.tsx`
 - Admin de perfiles en `src/app/admin/perfiles/page.tsx`
 - Login en `src/app/login/page.tsx`
-- Modulo de recordatorios en `src/app/recordatorios`
 
 ## Stack y estructura
 
@@ -73,14 +72,13 @@ Carpetas relevantes:
 - `src/app`: paginas, layouts y route handlers
 - `src/components`: UI compartida y clientes interactivos
 - `src/lib`: acceso a datos, auth, esquemas y logica de dominio
-- `scripts`: utilidades de desarrollo, worker de recordatorios y seed de usuario admin
+- `scripts`: utilidades de desarrollo y seed de usuario admin
 
 ## Reglas de implementacion
 
 - Mantener el codigo de App Router dentro de `src/app`.
 - Reutilizar logica de dominio desde `src/lib` en lugar de duplicar consultas o validaciones en rutas y componentes.
 - Validar entradas de perfiles con `src/lib/profile-schema.ts`.
-- Validar entradas de recordatorios con `src/lib/reminder-schema.ts`.
 - Preferir server components en paginas y layouts; usar client components solo cuando haga falta interactividad.
 - Antes de cambiar comportamiento de routing, metadata, route handlers o rendering, revisar la documentacion local de Next en `node_modules/next/dist/docs/`.
 
@@ -105,7 +103,7 @@ Carpetas relevantes:
 ## UI
 
 - La pagina publica del perfil puede tener una identidad visual mas marcada y mobile-first.
-- El admin y recordatorios deben priorizar claridad operativa, velocidad de uso y mantenimiento sencillo.
+- El admin debe priorizar claridad operativa, velocidad de uso y mantenimiento sencillo.
 - No asumir paletas, tipografias o estilos de otras marcas o proyectos. Cualquier decision visual nueva debe justificarse dentro de este repositorio.
 
 ## Entorno
@@ -118,7 +116,9 @@ Carpetas relevantes:
 
 - `npm run dev`
 - `npm run dev:web`
-- `npm run dev:reminder-worker`
 - `npm run build`
 - `npm run lint`
 - `npm run seed:auth-user`
+
+## Commit
+Luego de realizar una implementacion de manera correcta, devolver el comando git -am "{descripcion commit}". Ademas actualizar el AGENTS.md y el CHANGELOG.md, si estos archivos no existen deben ser creados y actualizados.

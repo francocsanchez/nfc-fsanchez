@@ -72,7 +72,7 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-1.5">
-        <label htmlFor="email" className="text-sm font-medium text-zinc-900">
+        <label htmlFor="email" className="text-sm font-medium text-foreground">
           Email
         </label>
         <input
@@ -80,7 +80,7 @@ export function LoginForm() {
           type="email"
           autoComplete="email"
           placeholder="fsanchez@nipponcarsrl.com.ar"
-          className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-zinc-900 focus:ring-4 focus:ring-zinc-900/10"
+          className="w-full border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:ring-4 focus:ring-foreground/10"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           disabled={pending}
@@ -89,7 +89,7 @@ export function LoginForm() {
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="password" className="text-sm font-medium text-zinc-900">
+        <label htmlFor="password" className="text-sm font-medium text-foreground">
           Contrasena
         </label>
         <input
@@ -97,7 +97,7 @@ export function LoginForm() {
           type="password"
           autoComplete="current-password"
           placeholder="Tu contrasena"
-          className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-zinc-900 focus:ring-4 focus:ring-zinc-900/10"
+          className="w-full border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-foreground focus:ring-4 focus:ring-foreground/10"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           disabled={pending}
@@ -106,7 +106,7 @@ export function LoginForm() {
       </div>
 
       {error ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       ) : null}

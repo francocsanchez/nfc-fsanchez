@@ -2,6 +2,8 @@
 
 Plataforma de perfiles NFC construida con Next.js 16, App Router y MongoDB.
 
+La superficie activa actual del proyecto esta enfocada en la administracion de perfiles NFC.
+
 ## Desarrollo local
 
 Variables base:
