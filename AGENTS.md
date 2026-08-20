@@ -110,6 +110,7 @@ Carpetas relevantes:
 
 - La pagina publica del perfil puede tener una identidad visual mas marcada y mobile-first.
 - La landing publica de `vendedor` muestra catalogo; `administracion` y `general` no muestran catalogo.
+- La landing publica de `administracion` debe seguir la referencia visual definida en `template_administracion/`.
 - El sitio web e Instagram visibles en landings publicas son globales para todos los perfiles.
 - La direccion visible en la landing publica se resuelve por la sucursal global asignada al perfil.
 - La vista `/credenciales/perfiles/admin` debe priorizar la tabla de perfiles; el catalogo se consulta en dialog y las configuraciones globales se editan aparte.
@@ -132,4 +133,10 @@ Carpetas relevantes:
 - `npm run seed:auth-user`
 
 ## Commit
-Luego de realizar una implementacion de manera correcta, devolver unicamente el comando git -am "{descripcion commit}" ya que este agrega todo al stage y lo commitea. Ademas actualizar el AGENTS.md y el CHANGELOG.md, si estos archivos no existen deben ser creados y actualizados.
+Luego de realizar una implementacion de manera correcta, devolver unicamente el comando 
+
+```bash
+git -am "{descripcion commit}"
+```
+
+ ya que este agrega todo al stage y lo commitea. Ademas actualizar el AGENTS.md y el CHANGELOG.md, si estos archivos no existen deben ser creados y actualizados.
