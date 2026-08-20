@@ -373,6 +373,8 @@ function AdministrationProfileLayout({
   whatsappTrackingUrl: string;
   hasWhatsapp: boolean;
 }) {
+  const branch = getProfileBranch(profile, globalSettings);
+
   return (
     <main
       className={cn(
@@ -416,6 +418,20 @@ function AdministrationProfileLayout({
                   </a>
                 </DetailRow>
               ) : null}
+              {branch?.address ? (
+                <DetailRow
+                  icon={<MapPin className="h-5 w-5" />}
+                  link={Boolean(branch.googleMapsUrl)}
+                >
+                  {branch.googleMapsUrl ? (
+                    <a href={branch.googleMapsUrl} target="_blank" rel="noreferrer">
+                      {branch.address}
+                    </a>
+                  ) : (
+                    <span>{branch.address}</span>
+                  )}
+                </DetailRow>
+              ) : null}
             </div>
           </div>
 
@@ -442,6 +458,20 @@ function AdministrationProfileLayout({
                   <a href={globalSettings.instagramUrl} target="_blank" rel="noreferrer">
                     {globalSettings.instagramUrl}
                   </a>
+                </DetailRow>
+              ) : null}
+              {branch?.address ? (
+                <DetailRow
+                  icon={<MapPin className="h-5 w-5" />}
+                  link={Boolean(branch.googleMapsUrl)}
+                >
+                  {branch.googleMapsUrl ? (
+                    <a href={branch.googleMapsUrl} target="_blank" rel="noreferrer">
+                      {branch.address}
+                    </a>
+                  ) : (
+                    <span>{branch.address}</span>
+                  )}
                 </DetailRow>
               ) : null}
             </div>
