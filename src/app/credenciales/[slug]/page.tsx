@@ -139,23 +139,9 @@ function ContactActions({
   hasWhatsapp: boolean;
   monochrome?: boolean;
 }) {
-  const sectionTitleClasses = monochrome
-    ? "text-[#4c4546] tracking-[0.28em]"
-    : "text-muted-foreground tracking-[0.28em]";
-  const sectionBodyClasses = monochrome
-    ? "text-[#4c4546]"
-    : "text-muted-foreground";
-
   return (
     <div className="space-y-4 md:space-y-5">
-      <div className="space-y-2">
-        <p className={cn("text-[0.72rem] uppercase", sectionTitleClasses)}>
-          Accesos
-        </p>
-        <p className={cn("max-w-[34rem] text-sm leading-6", sectionBodyClasses)}>
-          Guarda esta credencial en tu telefono o inicia una conversacion directa.
-        </p>
-      </div>
+      
 
       <div
         className={cn(
@@ -225,8 +211,7 @@ function CatalogSection({
             Catalogo
           </p>
           <p className="max-w-[36rem] text-sm leading-6 text-muted-foreground">
-            Productos y fichas tecnicas disponibles para consultar desde esta
-            credencial.
+            Productos y fichas tecnicas disponibles.
           </p>
         </div>
 
