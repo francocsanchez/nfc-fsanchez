@@ -63,7 +63,7 @@ Superficies principales:
 ## Stack y estructura
 
 - Framework: `next@16.2.11` con App Router
-- UI: React 19, Tailwind 4, componentes compartidos en `src/components`
+- UI: React 19, Tailwind 4, Iconoir para iconografia y componentes compartidos en `src/components`
 - Datos: MongoDB
 - Auth: Better Auth con email/password y sesiones en MongoDB
 
@@ -87,11 +87,14 @@ Carpetas relevantes:
 - Los perfiles publicos se resuelven por `slug`.
 - Los `slug` deben permanecer estables una vez creados.
 - Los perfiles inactivos no deben exponerse en la ruta publica.
+- Los roles vigentes son `general` (legacy), `vendedor` y `administracion`.
 - `name` y `email` son obligatorios para perfiles.
 - `jobTitle`, `address`, `googleMapsUrl` y `whatsapp` se serializan como strings; evitar `null` y `undefined`.
+- `websiteUrl` e `instagramUrl` ya no son campos personales del perfil; viven como configuracion global compartida.
 - El campo legacy `landingUrl` no debe reintroducirse en codigo nuevo.
 - `whatsapp` se guarda como digitos locales; la URL publica a WhatsApp se arma al renderizar.
 - `googleMapsUrl`, cuando existe, debe seguir la validacion del esquema actual.
+- `instagramUrl`, cuando existe, debe ser un link valido de perfil de Instagram en la configuracion global.
 
 ## Auth y acceso
 
@@ -104,6 +107,9 @@ Carpetas relevantes:
 ## UI
 
 - La pagina publica del perfil puede tener una identidad visual mas marcada y mobile-first.
+- La landing publica de `vendedor` muestra catalogo; `administracion` y `general` no muestran catalogo.
+- El sitio web e Instagram visibles en landings publicas son globales para todos los perfiles.
+- La vista `/credenciales/perfiles/admin` debe priorizar la tabla de perfiles; el catalogo se consulta en dialog y las configuraciones globales se editan aparte.
 - El admin debe priorizar claridad operativa, velocidad de uso y mantenimiento sencillo.
 - No asumir paletas, tipografias o estilos de otras marcas o proyectos. Cualquier decision visual nueva debe justificarse dentro de este repositorio.
 
@@ -123,4 +129,4 @@ Carpetas relevantes:
 - `npm run seed:auth-user`
 
 ## Commit
-Luego de realizar una implementacion de manera correcta, devolver el comando git -am "{descripcion commit}". Ademas actualizar el AGENTS.md y el CHANGELOG.md, si estos archivos no existen deben ser creados y actualizados.
+Luego de realizar una implementacion de manera correcta, devolver unicamente el comando git -am "{descripcion commit}" ya que este agrega todo al stage y lo commitea. Ademas actualizar el AGENTS.md y el CHANGELOG.md, si estos archivos no existen deben ser creados y actualizados.

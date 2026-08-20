@@ -2,11 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Download, Upload } from "lucide-react";
+import { Download, Upload } from "iconoir-react";
 import { startTransition, useRef, useState } from "react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { type CatalogSettings } from "@/lib/catalog-schema";
+import {
+  profileGlobalSettingsSchema,
+  type ProfileGlobalSettings,
+} from "@/lib/profile-global-settings-schema";
 import { getPublicProfileUrl } from "@/lib/public-url";
 import {
   createProfileSchema,
@@ -20,11 +24,18 @@ import {
 type ProfileAdminClientProps = {
   initialProfiles: Profile[];
   initialCatalog: CatalogSettings;
+  initialGlobalSettings: ProfileGlobalSettings;
 };
 
 type FieldErrors = Partial<
   Record<
-    "name" | "jobTitle" | "address" | "googleMapsUrl" | "websiteUrl" | "email" | "whatsapp" | "rol",
+    | "name"
+    | "jobTitle"
+    | "address"
+    | "googleMapsUrl"
+    | "email"
+    | "whatsapp"
+    | "rol",
     string[]
   >
 >;
@@ -45,16 +56,18 @@ type FormValues = {
   jobTitle: string;
   address: string;
   googleMapsUrl: string;
-  websiteUrl: string;
   email: string;
   whatsapp: string;
   rol: Profile["rol"];
   isActive: boolean;
 };
 
+type GlobalSettingsValues = ProfileGlobalSettings;
+
 const roleLabels: Record<Profile["rol"], string> = {
   general: "General",
   vendedor: "Vendedor",
+  administracion: "Administracion",
 };
 
 const emptyValues: FormValues = {
@@ -62,7 +75,6 @@ const emptyValues: FormValues = {
   jobTitle: "",
   address: "",
   googleMapsUrl: "",
-  websiteUrl: "",
   email: "",
   whatsapp: "",
   rol: "general",
@@ -354,29 +366,6 @@ function ProfileModal({
               </div>
 
               <div className="space-y-1.5">
-                <label
-                  htmlFor="profile-website-url"
-                  className="text-sm font-medium"
-                >
-                  Sitio web
-                </label>
-                <input
-                  id="profile-website-url"
-                  type="url"
-                  value={values.websiteUrl}
-                  onChange={(event) => onChange("websiteUrl", event.target.value)}
-                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
-                  placeholder="https://..."
-                  autoComplete="url"
-                />
-                {errors.websiteUrl?.[0] ? (
-                  <p className="text-sm text-destructive">
-                    {errors.websiteUrl[0]}
-                  </p>
-                ) : null}
-              </div>
-
-              <div className="space-y-1.5">
                 <label htmlFor="profile-email" className="text-sm font-medium">
                   Email
                 </label>
@@ -577,12 +566,288 @@ function ChangePasswordModal({
   );
 }
 
+function GlobalSettingsModal({
+  open,
+  values,
+  errors,
+  submitting,
+  submitError,
+  onChange,
+  onClose,
+  onSubmit,
+}: {
+  open: boolean;
+  values: GlobalSettingsValues;
+  errors: Partial<Record<keyof GlobalSettingsValues, string[]>>;
+  submitting: boolean;
+  submitError: string | null;
+  onChange: (field: keyof GlobalSettingsValues, value: string) => void;
+  onClose: () => void;
+  onSubmit: () => void;
+}) {
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-0 sm:p-6">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="global-settings-modal-title"
+        className="mt-auto w-full rounded-t-3xl border border-border bg-background p-5 shadow-2xl sm:mx-auto sm:my-auto sm:max-w-2xl sm:rounded-3xl sm:p-6"
+      >
+        <div className="flex max-h-[100dvh] flex-col sm:max-h-[calc(100dvh-3rem)]">
+          <div className="mb-5 flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Configuracion compartida
+              </p>
+              <h2
+                id="global-settings-modal-title"
+                className="text-xl font-semibold"
+              >
+                Configuraciones globales
+              </h2>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={onClose}
+              disabled={submitting}
+            >
+              <span className="sr-only">Cerrar modal</span>x
+            </Button>
+          </div>
+
+          <form
+            className="space-y-5 overflow-y-auto pr-1"
+            onSubmit={(event) => {
+              event.preventDefault();
+              onSubmit();
+            }}
+          >
+            <div className="rounded-3xl border border-border bg-card p-4 text-sm text-muted-foreground">
+              Estos valores se comparten en todas las landings publicas, sin
+              importar el rol del perfil.
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-1.5">
+                <label htmlFor="global-website-url" className="text-sm font-medium">
+                  Sitio web global
+                </label>
+                <input
+                  id="global-website-url"
+                  type="url"
+                  value={values.websiteUrl}
+                  onChange={(event) => onChange("websiteUrl", event.target.value)}
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+                  placeholder="https://..."
+                  autoComplete="url"
+                />
+                {errors.websiteUrl?.[0] ? (
+                  <p className="text-sm text-destructive">{errors.websiteUrl[0]}</p>
+                ) : null}
+              </div>
+
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="global-instagram-url"
+                  className="text-sm font-medium"
+                >
+                  Instagram global
+                </label>
+                <input
+                  id="global-instagram-url"
+                  type="url"
+                  value={values.instagramUrl}
+                  onChange={(event) => onChange("instagramUrl", event.target.value)}
+                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+                  placeholder="https://instagram.com/..."
+                  autoComplete="url"
+                />
+                {errors.instagramUrl?.[0] ? (
+                  <p className="text-sm text-destructive">
+                    {errors.instagramUrl[0]}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+
+            {submitError ? (
+              <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {submitError}
+              </div>
+            ) : null}
+
+            <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={onClose}
+                disabled={submitting}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={submitting}>
+                {submitting ? "Guardando..." : "Guardar configuracion"}
+              </Button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CatalogModal({
+  open,
+  catalog,
+  actionError,
+  downloading,
+  uploading,
+  fileInputRef,
+  onClose,
+  onDownload,
+  onOpenUpload,
+  onUpload,
+}: {
+  open: boolean;
+  catalog: CatalogSettings;
+  actionError: string | null;
+  downloading: boolean;
+  uploading: boolean;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
+  onClose: () => void;
+  onDownload: () => void;
+  onOpenUpload: () => void;
+  onUpload: (file: File) => void;
+}) {
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-0 sm:p-6">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="catalog-modal-title"
+        className="mt-auto w-full rounded-t-3xl border border-border bg-background p-5 shadow-2xl sm:mx-auto sm:my-auto sm:max-w-5xl sm:rounded-3xl sm:p-6"
+      >
+        <div className="flex max-h-[100dvh] flex-col sm:max-h-[calc(100dvh-3rem)]">
+          <div className="mb-5 flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Vendedores
+              </p>
+              <h2 id="catalog-modal-title" className="text-xl font-semibold">
+                Catalogo compartido
+              </h2>
+              <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                Solo los perfiles con rol vendedor muestran este catalogo en su
+                landing publica.
+              </p>
+            </div>
+            <Button variant="ghost" size="icon-sm" onClick={onClose}>
+              <span className="sr-only">Cerrar modal</span>x
+            </Button>
+          </div>
+
+          <div className="space-y-5 overflow-y-auto pr-1">
+            {actionError ? (
+              <div className="rounded-3xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {actionError}
+              </div>
+            ) : null}
+
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                className="hidden"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+
+                  if (file) {
+                    onUpload(file);
+                  }
+                }}
+              />
+              <Button
+                variant="outline"
+                onClick={onDownload}
+                disabled={downloading || uploading}
+              >
+                <Download className="h-4 w-4" />
+                {downloading ? "Descargando..." : "Descargar Excel"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={onOpenUpload}
+                disabled={uploading || downloading}
+              >
+                <Upload className="h-4 w-4" />
+                {uploading ? "Subiendo..." : "Subir Excel"}
+              </Button>
+            </div>
+
+            <div className="space-y-3">
+              {catalog.items.length === 0 ? (
+                <div className="rounded-3xl border border-dashed border-border bg-background px-4 py-6 text-sm text-muted-foreground">
+                  No hay productos cargados todavia.
+                </div>
+              ) : (
+                catalog.items.map((item, index) => (
+                  <div
+                    key={index}
+                    className="grid gap-4 rounded-3xl border border-border bg-background p-4 sm:grid-cols-[168px_minmax(0,1fr)_auto] sm:items-center"
+                  >
+                    <div className="overflow-hidden rounded-2xl border border-border bg-muted">
+                      <Image
+                        src={item.imageUrl}
+                        alt={item.name}
+                        width={580}
+                        height={280}
+                        unoptimized
+                        className="aspect-[29/14] h-auto w-full object-cover"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                        Producto {index + 1}
+                      </p>
+                      <p className="truncate text-base font-medium">{item.name}</p>
+                    </div>
+                    <a
+                      href={item.technicalSheetUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-border px-4 text-sm font-medium transition hover:border-foreground hover:bg-muted"
+                    >
+                      Ver ficha
+                    </a>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ProfileAdminClient({
   initialProfiles,
   initialCatalog,
+  initialGlobalSettings,
 }: ProfileAdminClientProps) {
   const [profiles, setProfiles] = useState(initialProfiles);
   const [catalog, setCatalog] = useState(initialCatalog);
+  const [globalSettings, setGlobalSettings] = useState(initialGlobalSettings);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
@@ -600,6 +865,15 @@ export function ProfileAdminClient({
   const [catalogActionError, setCatalogActionError] = useState<string | null>(null);
   const [catalogDownloading, setCatalogDownloading] = useState(false);
   const [catalogUploading, setCatalogUploading] = useState(false);
+  const [catalogModalOpen, setCatalogModalOpen] = useState(false);
+  const [globalSettingsModalOpen, setGlobalSettingsModalOpen] = useState(false);
+  const [globalSettingsValues, setGlobalSettingsValues] =
+    useState<GlobalSettingsValues>(initialGlobalSettings);
+  const [globalSettingsErrors, setGlobalSettingsErrors] = useState<
+    Partial<Record<keyof GlobalSettingsValues, string[]>>
+  >({});
+  const [globalSettingsSubmitting, setGlobalSettingsSubmitting] = useState(false);
+  const [globalSettingsError, setGlobalSettingsError] = useState<string | null>(null);
   const [photoSubmitting, setPhotoSubmitting] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const catalogFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -623,7 +897,6 @@ export function ProfileAdminClient({
       jobTitle: profile.jobTitle,
       address: profile.address,
       googleMapsUrl: profile.googleMapsUrl,
-      websiteUrl: profile.websiteUrl,
       email: profile.email,
       whatsapp: profile.whatsapp,
       rol: profile.rol,
@@ -661,8 +934,40 @@ export function ProfileAdminClient({
     setPasswordError(null);
   }
 
+  function openCatalogModal() {
+    setCatalogModalOpen(true);
+  }
+
+  function closeCatalogModal() {
+    setCatalogModalOpen(false);
+  }
+
+  function openGlobalSettingsModal() {
+    setGlobalSettingsValues(globalSettings);
+    setGlobalSettingsErrors({});
+    setGlobalSettingsError(null);
+    setGlobalSettingsModalOpen(true);
+  }
+
+  function closeGlobalSettingsModal() {
+    if (globalSettingsSubmitting) {
+      return;
+    }
+
+    setGlobalSettingsModalOpen(false);
+    setGlobalSettingsErrors({});
+    setGlobalSettingsError(null);
+  }
+
   function updateFormValue(field: keyof FormValues, value: string | boolean) {
     setFormValues((current) => ({ ...current, [field]: value }));
+  }
+
+  function updateGlobalSettingsValue(
+    field: keyof GlobalSettingsValues,
+    value: string,
+  ) {
+    setGlobalSettingsValues((current) => ({ ...current, [field]: value }));
   }
 
   function updatePasswordValue(
@@ -681,6 +986,12 @@ export function ProfileAdminClient({
   function syncCatalog(nextCatalog: CatalogSettings) {
     startTransition(() => {
       setCatalog(nextCatalog);
+    });
+  }
+
+  function syncGlobalSettings(nextSettings: GlobalSettingsValues) {
+    startTransition(() => {
+      setGlobalSettings(nextSettings);
     });
   }
 
@@ -723,7 +1034,6 @@ export function ProfileAdminClient({
             jobTitle: formValues.jobTitle,
             address: formValues.address,
             googleMapsUrl: formValues.googleMapsUrl,
-            websiteUrl: formValues.websiteUrl,
             email: formValues.email,
             whatsapp: formValues.whatsapp,
             rol: formValues.rol,
@@ -733,7 +1043,6 @@ export function ProfileAdminClient({
             jobTitle: formValues.jobTitle,
             address: formValues.address,
             googleMapsUrl: formValues.googleMapsUrl,
-            websiteUrl: formValues.websiteUrl,
             email: formValues.email,
             whatsapp: formValues.whatsapp,
             rol: formValues.rol,
@@ -810,7 +1119,6 @@ export function ProfileAdminClient({
           jobTitle: profile.jobTitle,
           address: profile.address,
           googleMapsUrl: profile.googleMapsUrl,
-          websiteUrl: profile.websiteUrl,
           email: profile.email,
           whatsapp: profile.whatsapp,
           rol: profile.rol,
@@ -981,6 +1289,54 @@ export function ProfileAdminClient({
     }
   }
 
+  async function submitGlobalSettings() {
+    setGlobalSettingsErrors({});
+    setGlobalSettingsError(null);
+    setSuccessMessage(null);
+
+    const validation = profileGlobalSettingsSchema.safeParse(globalSettingsValues);
+
+    if (!validation.success) {
+      setGlobalSettingsErrors(validation.error.flatten().fieldErrors);
+      return;
+    }
+
+    setGlobalSettingsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/profile-global-settings", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(validation.data),
+      });
+
+      const data = (await response.json()) as ApiErrorResponse & {
+        settings?: GlobalSettingsValues;
+      };
+
+      if (!response.ok || !data.settings) {
+        setGlobalSettingsErrors(
+          (data.fieldErrors ?? {}) as Partial<Record<keyof GlobalSettingsValues, string[]>>
+        );
+        setGlobalSettingsError(
+          data.error ?? "No se pudieron guardar las configuraciones globales.",
+        );
+        return;
+      }
+
+      syncGlobalSettings(data.settings);
+      setGlobalSettingsValues(data.settings);
+      setGlobalSettingsModalOpen(false);
+      setSuccessMessage("Configuraciones globales actualizadas.");
+    } catch (error) {
+      setGlobalSettingsError(getErrorMessage(error));
+    } finally {
+      setGlobalSettingsSubmitting(false);
+    }
+  }
+
   async function submitPasswordChange() {
     setPasswordError(null);
     setSuccessMessage(null);
@@ -1053,8 +1409,8 @@ export function ProfileAdminClient({
           <div>
             <h1 className="text-2xl font-semibold sm:text-3xl">Perfiles NFC</h1>
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground sm:text-base">
-              Administra perfiles, define su rol y controla el catalogo compartido
-              que se muestra en los vendedores.
+              Administra perfiles, define su rol y controla el catalogo global
+              que se muestra solo en las landings de vendedores.
             </p>
           </div>
         </div>
@@ -1078,6 +1434,16 @@ export function ProfileAdminClient({
           >
             Ver metricas
           </Link>
+          <Button variant="outline" size="lg" onClick={openCatalogModal}>
+            Ver catalogo
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={openGlobalSettingsModal}
+          >
+            Config globales
+          </Button>
           <Button variant="outline" size="lg" onClick={openPasswordModal}>
             Cambiar contrasena
           </Button>
@@ -1104,89 +1470,6 @@ export function ProfileAdminClient({
           {catalogActionError}
         </div>
       ) : null}
-
-      <section className="rounded-3xl border border-border bg-card p-5">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-1">
-            <h2 className="text-lg font-semibold">Catalogo de vendedores</h2>
-            <p className="max-w-2xl text-sm text-muted-foreground">
-              Todos los perfiles con rol vendedor comparten estos productos en su
-              tarjeta publica.
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <input
-              ref={catalogFileInputRef}
-              type="file"
-              accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-              className="hidden"
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-
-                if (file) {
-                  void uploadCatalogExcel(file);
-                }
-              }}
-            />
-            <Button
-              variant="outline"
-              onClick={downloadCatalogExcel}
-              disabled={catalogDownloading || catalogUploading}
-            >
-              <Download className="h-4 w-4" />
-              {catalogDownloading ? "Descargando..." : "Descargar Excel"}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={openCatalogUpload}
-              disabled={catalogUploading || catalogDownloading}
-            >
-              <Upload className="h-4 w-4" />
-              {catalogUploading ? "Subiendo..." : "Subir Excel"}
-            </Button>
-          </div>
-        </div>
-
-        <div className="mt-4 space-y-3">
-          {catalog.items.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-border bg-background px-4 py-6 text-sm text-muted-foreground">
-              No hay productos cargados todavia.
-            </div>
-          ) : (
-            catalog.items.map((item, index) => (
-              <div
-                key={index}
-                className="grid gap-4 rounded-3xl border border-border bg-background p-4 sm:grid-cols-[168px_minmax(0,1fr)_auto] sm:items-center"
-              >
-                <div className="overflow-hidden rounded-2xl border border-border bg-muted">
-                  <Image
-                    src={item.imageUrl}
-                    alt={item.name}
-                    width={580}
-                    height={280}
-                    unoptimized
-                    className="aspect-[29/14] h-auto w-full object-cover"
-                  />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                    Producto {index + 1}
-                  </p>
-                  <p className="truncate text-base font-medium">{item.name}</p>
-                </div>
-                <a
-                  href={item.technicalSheetUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-border px-4 text-sm font-medium transition hover:border-foreground hover:bg-muted"
-                >
-                  Ver ficha
-                </a>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
 
       <section className="overflow-hidden rounded-3xl border border-border bg-card">
         <div className="overflow-x-auto">
@@ -1317,6 +1600,32 @@ export function ProfileAdminClient({
         onChange={updatePasswordValue}
         onClose={closePasswordModal}
         onSubmit={submitPasswordChange}
+      />
+      <GlobalSettingsModal
+        open={globalSettingsModalOpen}
+        values={globalSettingsValues}
+        errors={globalSettingsErrors}
+        submitting={globalSettingsSubmitting}
+        submitError={globalSettingsError}
+        onChange={updateGlobalSettingsValue}
+        onClose={closeGlobalSettingsModal}
+        onSubmit={submitGlobalSettings}
+      />
+      <CatalogModal
+        open={catalogModalOpen}
+        catalog={catalog}
+        actionError={catalogActionError}
+        downloading={catalogDownloading}
+        uploading={catalogUploading}
+        fileInputRef={catalogFileInputRef}
+        onClose={closeCatalogModal}
+        onDownload={() => {
+          void downloadCatalogExcel();
+        }}
+        onOpenUpload={openCatalogUpload}
+        onUpload={(file) => {
+          void uploadCatalogExcel(file);
+        }}
       />
     </div>
   );

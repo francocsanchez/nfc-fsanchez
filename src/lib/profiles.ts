@@ -25,12 +25,11 @@ export type ProfileDocument = {
   jobTitle: string;
   address: string;
   googleMapsUrl: string;
-  websiteUrl?: string;
   email: string;
   whatsapp: string;
   profilePhotoUrl?: string;
   profilePhotoFileId?: string;
-  rol?: "general" | "vendedor";
+  rol?: "general" | "vendedor" | "administracion";
   slug: string;
   isActive: boolean;
   createdAt: Date;
@@ -73,7 +72,6 @@ function serializeProfile(profile: WithId<ProfileDocument>): Profile {
     jobTitle: profile.jobTitle ?? "",
     address: profile.address ?? "",
     googleMapsUrl: profile.googleMapsUrl ?? "",
-    websiteUrl: profile.websiteUrl ?? "",
     email: profile.email,
     whatsapp: profile.whatsapp ?? "",
     profilePhotoUrl: profile.profilePhotoUrl ?? "",
@@ -238,7 +236,6 @@ export async function updateProfile(id: string, input: UpdateProfileInput) {
         jobTitle: data.jobTitle,
         address: data.address,
         googleMapsUrl: data.googleMapsUrl,
-        websiteUrl: data.websiteUrl,
         email: data.email,
         whatsapp: data.whatsapp,
         rol: data.rol,
@@ -247,6 +244,8 @@ export async function updateProfile(id: string, input: UpdateProfileInput) {
       },
       $unset: {
         landingUrl: "",
+        websiteUrl: "",
+        instagramUrl: "",
       },
     },
   );
