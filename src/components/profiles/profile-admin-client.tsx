@@ -117,6 +117,17 @@ function getErrorMessage(error: unknown) {
   return "Ocurrio un error inesperado.";
 }
 
+function createBranchId() {
+  if (
+    typeof globalThis.crypto !== "undefined" &&
+    typeof globalThis.crypto.randomUUID === "function"
+  ) {
+    return globalThis.crypto.randomUUID();
+  }
+
+  return `branch-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 function ProfileModal({
   mode,
   open,
@@ -1115,7 +1126,7 @@ export function ProfileAdminClient({
       branches: [
         ...current.branches,
         {
-          id: crypto.randomUUID(),
+          id: createBranchId(),
           name: "",
           address: "",
           googleMapsUrl: "",
