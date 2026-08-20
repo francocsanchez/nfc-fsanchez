@@ -398,12 +398,12 @@ function AdministrationProfileLayout({
     >
       <div className="flex min-h-screen items-center justify-center p-0 md:p-6">
         <section className="mx-auto flex min-h-screen w-full max-w-5xl flex-col overflow-hidden bg-white md:min-h-[600px] md:flex-row md:border md:border-[#e2e2e2]">
-          <div className="flex w-full flex-col border-[#e2e2e2] px-6 py-6 md:w-1/3 md:border-r md:px-12 md:py-12">
+          <div className="flex w-full flex-col items-center border-[#e2e2e2] px-6 py-6 text-center md:w-1/3 md:border-r md:px-12 md:py-12">
             <ProfileAvatar
               name={profile.name}
               profilePhotoUrl={profile.profilePhotoUrl}
               updatedAt={profile.updatedAt}
-              className="mb-6 h-32 w-32 bg-black"
+              className="mb-6 aspect-square w-full max-w-[240px] bg-black"
             />
 
             <div className="mb-12">

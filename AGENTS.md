@@ -136,7 +136,7 @@ Carpetas relevantes:
 Luego de realizar una implementacion de manera correcta, devolver unicamente el comando 
 
 ```bash
-git -am "{descripcion commit}"
+git commit -am "{descripcion commit}"
 ```
 
  ya que este agrega todo al stage y lo commitea. Ademas actualizar el AGENTS.md y el CHANGELOG.md, si estos archivos no existen deben ser creados y actualizados.
