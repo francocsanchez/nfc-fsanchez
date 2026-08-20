@@ -3,6 +3,17 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getProfileGlobalSettings } from "@/lib/profile-global-settings";
 import { getPublicProfileBySlug } from "@/lib/profiles";
 
+function getProfileBranch(
+  branchId: string,
+  globalSettings: Awaited<ReturnType<typeof getProfileGlobalSettings>>,
+) {
+  if (!branchId) {
+    return null;
+  }
+
+  return globalSettings.branches.find((branch) => branch.id === branchId) ?? null;
+}
+
 function escapeVCardValue(value: string) {
   return value
     .replace(/\\/g, "\\\\")
@@ -22,7 +33,8 @@ function buildVCard(
   const fullName = escapeVCardValue(profile.name);
   const orgTitle = escapeVCardValue(profile.jobTitle);
   const email = escapeVCardValue(profile.email);
-  const address = escapeVCardValue(profile.address);
+  const branch = getProfileBranch(profile.branchId, globalSettings);
+  const address = escapeVCardValue(branch?.address ?? "");
   const whatsapp = profile.whatsapp ? `+54 9 ${profile.whatsapp}` : "";
   const websiteUrl = escapeVCardValue(globalSettings.websiteUrl);
   const instagramUrl = escapeVCardValue(globalSettings.instagramUrl);
@@ -35,7 +47,7 @@ function buildVCard(
     profile.jobTitle ? `TITLE:${orgTitle}` : "",
     profile.email ? `EMAIL;TYPE=INTERNET:${email}` : "",
     profile.whatsapp ? `TEL;TYPE=CELL:${escapeVCardValue(whatsapp)}` : "",
-    profile.address ? `ADR;TYPE=WORK:;;${address};;;;` : "",
+    branch?.address ? `ADR;TYPE=WORK:;;${address};;;;` : "",
     globalSettings.websiteUrl ? `URL:${websiteUrl}` : "",
     globalSettings.instagramUrl
       ? `X-SOCIALPROFILE;TYPE=instagram:${instagramUrl}`

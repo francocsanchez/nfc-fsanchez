@@ -89,11 +89,13 @@ Carpetas relevantes:
 - Los perfiles inactivos no deben exponerse en la ruta publica.
 - Los roles vigentes son `general` (legacy), `vendedor` y `administracion`.
 - `name` y `email` son obligatorios para perfiles.
-- `jobTitle`, `address`, `googleMapsUrl` y `whatsapp` se serializan como strings; evitar `null` y `undefined`.
+- `jobTitle`, `branchId` y `whatsapp` se serializan como strings; evitar `null` y `undefined`.
 - `websiteUrl` e `instagramUrl` ya no son campos personales del perfil; viven como configuracion global compartida.
+- `address` y `googleMapsUrl` ya no son campos personales del perfil; viven dentro de sucursales globales.
+- Cada perfil puede tener asignada una sola sucursal mediante `branchId`.
 - El campo legacy `landingUrl` no debe reintroducirse en codigo nuevo.
 - `whatsapp` se guarda como digitos locales; la URL publica a WhatsApp se arma al renderizar.
-- `googleMapsUrl`, cuando existe, debe seguir la validacion del esquema actual.
+- `googleMapsUrl`, cuando existe, debe seguir la validacion del esquema actual dentro de cada sucursal.
 - `instagramUrl`, cuando existe, debe ser un link valido de perfil de Instagram en la configuracion global.
 
 ## Auth y acceso
@@ -109,6 +111,7 @@ Carpetas relevantes:
 - La pagina publica del perfil puede tener una identidad visual mas marcada y mobile-first.
 - La landing publica de `vendedor` muestra catalogo; `administracion` y `general` no muestran catalogo.
 - El sitio web e Instagram visibles en landings publicas son globales para todos los perfiles.
+- La direccion visible en la landing publica se resuelve por la sucursal global asignada al perfil.
 - La vista `/credenciales/perfiles/admin` debe priorizar la tabla de perfiles; el catalogo se consulta en dialog y las configuraciones globales se editan aparte.
 - El admin debe priorizar claridad operativa, velocidad de uso y mantenimiento sencillo.
 - No asumir paletas, tipografias o estilos de otras marcas o proyectos. Cualquier decision visual nueva debe justificarse dentro de este repositorio.

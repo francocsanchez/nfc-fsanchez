@@ -16,20 +16,12 @@ function optionalTextField(max: number) {
     .transform((value) => value ?? "");
 }
 
-const optionalUrlField = z
+const optionalBranchIdField = z
   .string()
   .trim()
   .optional()
   .or(z.literal(""))
-  .transform((value) => value ?? "")
-  .refine(
-    (value) =>
-      value === "" ||
-      /^https?:\/\/(www\.)?(google\.[^/]+|maps\.app\.goo\.gl)\//i.test(value),
-    {
-      message: "Ingresa un link valido de Google Maps",
-    },
-  );
+  .transform((value) => value ?? "");
 
 const whatsappSchema = z
   .string()
@@ -53,8 +45,7 @@ const whatsappSchema = z
 export const createProfileSchema = z.object({
   name: z.string().trim().min(1, "El nombre es obligatorio").max(120),
   jobTitle: optionalTextField(120),
-  address: optionalTextField(160),
-  googleMapsUrl: optionalUrlField,
+  branchId: optionalBranchIdField,
   email: z.string().trim().email("Ingresa un email valido").max(160),
   whatsapp: whatsappSchema,
   rol: profileRoleSchema.default("general"),
@@ -71,8 +62,7 @@ export type Profile = {
   id: string;
   name: string;
   jobTitle: string;
-  address: string;
-  googleMapsUrl: string;
+  branchId: string;
   email: string;
   whatsapp: string;
   profilePhotoUrl: string;

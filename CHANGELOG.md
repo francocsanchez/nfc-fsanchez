@@ -2,6 +2,9 @@
 
 ## 2026-08-20
 
+- Se movieron `address` y `googleMapsUrl` a sucursales globales, permitiendo crear multiples sucursales y asignar una sola sucursal a cada perfil mediante `branchId`.
+- Se actualizo el admin de perfiles para seleccionar sucursal por perfil y administrar sucursales desde las configuraciones globales, incluyendo bloqueo visual de eliminacion cuando una sucursal esta en uso.
+- La landing publica y la descarga `.vcf` ahora resuelven direccion y Google Maps desde la sucursal asignada al perfil.
 - Se reemplazo `lucide-react` por `iconoir-react` y se migraron todos los iconos activos del sistema a Iconoir.
 - Se agrego el rol `administracion` al dominio de perfiles NFC, manteniendo `general` como rol legacy editable desde el admin.
 - Se incorporo `instagramUrl` en validaciones, persistencia, APIs y formulario administrativo de perfiles.

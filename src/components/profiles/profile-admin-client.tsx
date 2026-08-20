@@ -8,6 +8,7 @@ import { startTransition, useRef, useState } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { type CatalogSettings } from "@/lib/catalog-schema";
 import {
+  type Branch,
   profileGlobalSettingsSchema,
   type ProfileGlobalSettings,
 } from "@/lib/profile-global-settings-schema";
@@ -31,8 +32,7 @@ type FieldErrors = Partial<
   Record<
     | "name"
     | "jobTitle"
-    | "address"
-    | "googleMapsUrl"
+    | "branchId"
     | "email"
     | "whatsapp"
     | "rol",
@@ -54,8 +54,7 @@ type ChangePasswordValues = {
 type FormValues = {
   name: string;
   jobTitle: string;
-  address: string;
-  googleMapsUrl: string;
+  branchId: string;
   email: string;
   whatsapp: string;
   rol: Profile["rol"];
@@ -73,8 +72,7 @@ const roleLabels: Record<Profile["rol"], string> = {
 const emptyValues: FormValues = {
   name: "",
   jobTitle: "",
-  address: "",
-  googleMapsUrl: "",
+  branchId: "",
   email: "",
   whatsapp: "",
   rol: "general",
@@ -123,6 +121,7 @@ function ProfileModal({
   mode,
   open,
   values,
+  branches,
   errors,
   submitting,
   photoSubmitting,
@@ -139,6 +138,7 @@ function ProfileModal({
   mode: "create" | "edit";
   open: boolean;
   values: FormValues;
+  branches: Branch[];
   errors: FieldErrors;
   submitting: boolean;
   photoSubmitting: boolean;
@@ -321,47 +321,28 @@ function ProfileModal({
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="profile-address" className="text-sm font-medium">
-                  Direccion
+                <label htmlFor="profile-branch" className="text-sm font-medium">
+                  Sucursal
                 </label>
-                <input
-                  id="profile-address"
-                  value={values.address}
-                  onChange={(event) => onChange("address", event.target.value)}
+                <select
+                  id="profile-branch"
+                  value={values.branchId}
+                  onChange={(event) => onChange("branchId", event.target.value)}
                   className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
-                  placeholder="Buenos Aires, Argentina"
-                  autoComplete="street-address"
-                />
-                {errors.address?.[0] ? (
-                  <p className="text-sm text-destructive">{errors.address[0]}</p>
-                ) : null}
-              </div>
-
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="profile-google-maps-url"
-                  className="text-sm font-medium"
                 >
-                  Link Google Maps
-                </label>
-                <input
-                  id="profile-google-maps-url"
-                  type="url"
-                  value={values.googleMapsUrl}
-                  onChange={(event) =>
-                    onChange("googleMapsUrl", event.target.value)
-                  }
-                  className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
-                  placeholder="https://maps.google.com/..."
-                  autoComplete="url"
-                />
+                  <option value="">Sin sucursal asignada</option>
+                  {branches.map((branch) => (
+                    <option key={branch.id} value={branch.id}>
+                      {branch.name}
+                    </option>
+                  ))}
+                </select>
                 <p className="text-xs text-muted-foreground">
-                  Opcional. Si lo completas, la direccion sera clickeable en la landing.
+                  Cada perfil puede tener una sola sucursal. La direccion publica
+                  se resuelve desde esta asignacion.
                 </p>
-                {errors.googleMapsUrl?.[0] ? (
-                  <p className="text-sm text-destructive">
-                    {errors.googleMapsUrl[0]}
-                  </p>
+                {errors.branchId?.[0] ? (
+                  <p className="text-sm text-destructive">{errors.branchId[0]}</p>
                 ) : null}
               </div>
 
@@ -570,18 +551,26 @@ function GlobalSettingsModal({
   open,
   values,
   errors,
+  branchUsage,
   submitting,
   submitError,
   onChange,
+  onBranchChange,
+  onAddBranch,
+  onRemoveBranch,
   onClose,
   onSubmit,
 }: {
   open: boolean;
   values: GlobalSettingsValues;
   errors: Partial<Record<keyof GlobalSettingsValues, string[]>>;
+  branchUsage: Record<string, number>;
   submitting: boolean;
   submitError: string | null;
   onChange: (field: keyof GlobalSettingsValues, value: string) => void;
+  onBranchChange: (branchId: string, field: keyof Branch, value: string) => void;
+  onAddBranch: () => void;
+  onRemoveBranch: (branchId: string) => void;
   onClose: () => void;
   onSubmit: () => void;
 }) {
@@ -628,8 +617,9 @@ function GlobalSettingsModal({
             }}
           >
             <div className="rounded-3xl border border-border bg-card p-4 text-sm text-muted-foreground">
-              Estos valores se comparten en todas las landings publicas, sin
-              importar el rol del perfil.
+              El sitio web, Instagram y las sucursales se comparten en todas las
+              landings publicas. Cada perfil puede quedar asociado a una sola
+              sucursal.
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -671,6 +661,136 @@ function GlobalSettingsModal({
                   <p className="text-sm text-destructive">
                     {errors.instagramUrl[0]}
                   </p>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-border bg-card p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 className="text-base font-semibold">Sucursales</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Crea y administra las sucursales disponibles para asignar a
+                    los perfiles.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onAddBranch}
+                  disabled={submitting}
+                >
+                  Agregar sucursal
+                </Button>
+              </div>
+
+              <div className="mt-4 space-y-4">
+                {values.branches.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-border bg-background px-4 py-5 text-sm text-muted-foreground">
+                    No hay sucursales cargadas todavia.
+                  </div>
+                ) : (
+                  values.branches.map((branch, index) => {
+                    const usageCount = branchUsage[branch.id] ?? 0;
+
+                    return (
+                      <div
+                        key={branch.id}
+                        className="rounded-2xl border border-border bg-background p-4"
+                      >
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                              Sucursal {index + 1}
+                            </p>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              {usageCount > 0
+                                ? `Asignada a ${usageCount} perfil${usageCount === 1 ? "" : "es"}`
+                                : "Sin perfiles asignados"}
+                            </p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => onRemoveBranch(branch.id)}
+                            disabled={submitting || usageCount > 0}
+                          >
+                            Eliminar
+                          </Button>
+                        </div>
+
+                        <div className="mt-4 grid gap-4 md:grid-cols-2">
+                          <div className="space-y-1.5">
+                            <label
+                              htmlFor={`branch-name-${branch.id}`}
+                              className="text-sm font-medium"
+                            >
+                              Nombre de sucursal
+                            </label>
+                            <input
+                              id={`branch-name-${branch.id}`}
+                              value={branch.name}
+                              onChange={(event) =>
+                                onBranchChange(branch.id, "name", event.target.value)
+                              }
+                              className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+                              placeholder="Casa Central"
+                            />
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <label
+                              htmlFor={`branch-address-${branch.id}`}
+                              className="text-sm font-medium"
+                            >
+                              Direccion
+                            </label>
+                            <input
+                              id={`branch-address-${branch.id}`}
+                              value={branch.address}
+                              onChange={(event) =>
+                                onBranchChange(
+                                  branch.id,
+                                  "address",
+                                  event.target.value,
+                                )
+                              }
+                              className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+                              placeholder="Av. Siempre Viva 742"
+                            />
+                          </div>
+
+                          <div className="space-y-1.5 md:col-span-2">
+                            <label
+                              htmlFor={`branch-maps-${branch.id}`}
+                              className="text-sm font-medium"
+                            >
+                              Link Google Maps
+                            </label>
+                            <input
+                              id={`branch-maps-${branch.id}`}
+                              type="url"
+                              value={branch.googleMapsUrl}
+                              onChange={(event) =>
+                                onBranchChange(
+                                  branch.id,
+                                  "googleMapsUrl",
+                                  event.target.value,
+                                )
+                              }
+                              className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20"
+                              placeholder="https://maps.google.com/..."
+                              autoComplete="url"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+
+                {errors.branches?.[0] ? (
+                  <p className="text-sm text-destructive">{errors.branches[0]}</p>
                 ) : null}
               </div>
             </div>
@@ -878,6 +998,13 @@ export function ProfileAdminClient({
   const [photoError, setPhotoError] = useState<string | null>(null);
   const catalogFileInputRef = useRef<HTMLInputElement | null>(null);
   const photoFileInputRef = useRef<HTMLInputElement | null>(null);
+  const branchUsage = profiles.reduce<Record<string, number>>((counts, profile) => {
+    if (profile.branchId) {
+      counts[profile.branchId] = (counts[profile.branchId] ?? 0) + 1;
+    }
+
+    return counts;
+  }, {});
 
   function openCreateModal() {
     setModalMode("create");
@@ -895,8 +1022,7 @@ export function ProfileAdminClient({
     setFormValues({
       name: profile.name,
       jobTitle: profile.jobTitle,
-      address: profile.address,
-      googleMapsUrl: profile.googleMapsUrl,
+      branchId: profile.branchId,
       email: profile.email,
       whatsapp: profile.whatsapp,
       rol: profile.rol,
@@ -970,6 +1096,41 @@ export function ProfileAdminClient({
     setGlobalSettingsValues((current) => ({ ...current, [field]: value }));
   }
 
+  function updateBranchValue(
+    branchId: string,
+    field: keyof Branch,
+    value: string,
+  ) {
+    setGlobalSettingsValues((current) => ({
+      ...current,
+      branches: current.branches.map((branch) =>
+        branch.id === branchId ? { ...branch, [field]: value } : branch,
+      ),
+    }));
+  }
+
+  function addBranch() {
+    setGlobalSettingsValues((current) => ({
+      ...current,
+      branches: [
+        ...current.branches,
+        {
+          id: crypto.randomUUID(),
+          name: "",
+          address: "",
+          googleMapsUrl: "",
+        },
+      ],
+    }));
+  }
+
+  function removeBranch(branchId: string) {
+    setGlobalSettingsValues((current) => ({
+      ...current,
+      branches: current.branches.filter((branch) => branch.id !== branchId),
+    }));
+  }
+
   function updatePasswordValue(
     field: keyof ChangePasswordValues,
     value: string,
@@ -1032,8 +1193,7 @@ export function ProfileAdminClient({
         ? ({
             name: formValues.name,
             jobTitle: formValues.jobTitle,
-            address: formValues.address,
-            googleMapsUrl: formValues.googleMapsUrl,
+            branchId: formValues.branchId,
             email: formValues.email,
             whatsapp: formValues.whatsapp,
             rol: formValues.rol,
@@ -1041,8 +1201,7 @@ export function ProfileAdminClient({
         : ({
             name: formValues.name,
             jobTitle: formValues.jobTitle,
-            address: formValues.address,
-            googleMapsUrl: formValues.googleMapsUrl,
+            branchId: formValues.branchId,
             email: formValues.email,
             whatsapp: formValues.whatsapp,
             rol: formValues.rol,
@@ -1117,8 +1276,7 @@ export function ProfileAdminClient({
         body: JSON.stringify({
           name: profile.name,
           jobTitle: profile.jobTitle,
-          address: profile.address,
-          googleMapsUrl: profile.googleMapsUrl,
+          branchId: profile.branchId,
           email: profile.email,
           whatsapp: profile.whatsapp,
           rol: profile.rol,
@@ -1409,8 +1567,8 @@ export function ProfileAdminClient({
           <div>
             <h1 className="text-2xl font-semibold sm:text-3xl">Perfiles NFC</h1>
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground sm:text-base">
-              Administra perfiles, define su rol y controla el catalogo global
-              que se muestra solo en las landings de vendedores.
+              Administra perfiles, define su rol, asigna sucursales y controla
+              las configuraciones globales compartidas.
             </p>
           </div>
         </div>
@@ -1478,6 +1636,7 @@ export function ProfileAdminClient({
               <tr>
                 <th className="px-4 py-4 font-medium">Perfil</th>
                 <th className="px-4 py-4 font-medium">Rol</th>
+                <th className="px-4 py-4 font-medium">Sucursal</th>
                 <th className="px-4 py-4 font-medium">Slug</th>
                 <th className="px-4 py-4 font-medium">Link del tag</th>
                 <th className="px-4 py-4 font-medium">Estado</th>
@@ -1488,7 +1647,7 @@ export function ProfileAdminClient({
               {profiles.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="px-4 py-10 text-center text-sm text-muted-foreground"
                   >
                     Todavia no hay perfiles cargados.
@@ -1499,6 +1658,9 @@ export function ProfileAdminClient({
               {profiles.map((profile) => {
                 const busy = listBusyId === profile.id;
                 const publicUrl = getPublicProfileUrl(profile.slug);
+                const branchName =
+                  globalSettings.branches.find((branch) => branch.id === profile.branchId)
+                    ?.name ?? "Sin sucursal";
 
                 return (
                   <tr key={profile.id} className="border-t border-border align-top">
@@ -1509,6 +1671,9 @@ export function ProfileAdminClient({
                       <span className="inline-flex rounded-full border border-border bg-background px-3 py-1 text-xs font-medium">
                         {roleLabels[profile.rol]}
                       </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className="text-sm text-muted-foreground">{branchName}</span>
                     </td>
                     <td className="px-4 py-4">
                       <Link
@@ -1579,6 +1744,7 @@ export function ProfileAdminClient({
         mode={modalMode}
         open={modalOpen}
         values={formValues}
+        branches={globalSettings.branches}
         errors={fieldErrors}
         submitting={submitting}
         photoSubmitting={photoSubmitting}
@@ -1605,9 +1771,13 @@ export function ProfileAdminClient({
         open={globalSettingsModalOpen}
         values={globalSettingsValues}
         errors={globalSettingsErrors}
+        branchUsage={branchUsage}
         submitting={globalSettingsSubmitting}
         submitError={globalSettingsError}
         onChange={updateGlobalSettingsValue}
+        onBranchChange={updateBranchValue}
+        onAddBranch={addBranch}
+        onRemoveBranch={removeBranch}
         onClose={closeGlobalSettingsModal}
         onSubmit={submitGlobalSettings}
       />

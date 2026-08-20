@@ -23,8 +23,7 @@ const PROFILES_COLLECTION = "profiles";
 export type ProfileDocument = {
   name: string;
   jobTitle: string;
-  address: string;
-  googleMapsUrl: string;
+  branchId?: string;
   email: string;
   whatsapp: string;
   profilePhotoUrl?: string;
@@ -70,8 +69,7 @@ function serializeProfile(profile: WithId<ProfileDocument>): Profile {
     id: profile._id.toHexString(),
     name: profile.name,
     jobTitle: profile.jobTitle ?? "",
-    address: profile.address ?? "",
-    googleMapsUrl: profile.googleMapsUrl ?? "",
+    branchId: profile.branchId ?? "",
     email: profile.email,
     whatsapp: profile.whatsapp ?? "",
     profilePhotoUrl: profile.profilePhotoUrl ?? "",
@@ -234,8 +232,7 @@ export async function updateProfile(id: string, input: UpdateProfileInput) {
       $set: {
         name: data.name,
         jobTitle: data.jobTitle,
-        address: data.address,
-        googleMapsUrl: data.googleMapsUrl,
+        branchId: data.branchId,
         email: data.email,
         whatsapp: data.whatsapp,
         rol: data.rol,
@@ -246,6 +243,8 @@ export async function updateProfile(id: string, input: UpdateProfileInput) {
         landingUrl: "",
         websiteUrl: "",
         instagramUrl: "",
+        address: "",
+        googleMapsUrl: "",
       },
     },
   );

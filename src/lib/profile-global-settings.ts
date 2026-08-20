@@ -5,6 +5,7 @@ import type { Collection, WithId } from "mongodb";
 import { getDatabase } from "@/lib/mongodb";
 import {
   profileGlobalSettingsSchema,
+  type Branch,
   type ProfileGlobalSettings,
 } from "@/lib/profile-global-settings-schema";
 
@@ -15,6 +16,7 @@ type ProfileGlobalSettingsDocument = {
   key: string;
   websiteUrl: string;
   instagramUrl: string;
+  branches: Branch[];
   updatedAt: Date;
   createdAt: Date;
 };
@@ -48,12 +50,14 @@ function serializeProfileGlobalSettings(
     return {
       websiteUrl: "",
       instagramUrl: "",
+      branches: [],
     };
   }
 
   return profileGlobalSettingsSchema.parse({
     websiteUrl: settings.websiteUrl ?? "",
     instagramUrl: settings.instagramUrl ?? "",
+    branches: settings.branches ?? [],
   });
 }
 
@@ -75,6 +79,7 @@ export async function updateProfileGlobalSettings(input: ProfileGlobalSettings) 
       $set: {
         websiteUrl: data.websiteUrl,
         instagramUrl: data.instagramUrl,
+        branches: data.branches,
         updatedAt: now,
       },
       $setOnInsert: {

@@ -144,6 +144,17 @@ type PublicProfile = NonNullable<
   Awaited<ReturnType<typeof getPublicProfileBySlug>>
 >;
 
+function getProfileBranch(
+  profile: PublicProfile,
+  globalSettings: Awaited<ReturnType<typeof getProfileGlobalSettings>>,
+) {
+  if (!profile.branchId) {
+    return null;
+  }
+
+  return globalSettings.branches.find((branch) => branch.id === profile.branchId) ?? null;
+}
+
 function ProfileSidebar({
   profile,
   globalSettings,
@@ -151,6 +162,8 @@ function ProfileSidebar({
   profile: PublicProfile;
   globalSettings: Awaited<ReturnType<typeof getProfileGlobalSettings>>;
 }) {
+  const branch = getProfileBranch(profile, globalSettings);
+
   return (
     <div className="space-y-5 px-5 py-6 md:sticky md:top-8 md:min-h-[calc(100vh-4rem)] md:border-r md:border-border md:px-7 md:py-8 lg:px-9 xl:px-10">
       <ProfileAvatar
@@ -198,19 +211,19 @@ function ProfileSidebar({
             </DetailRow>
           ) : null}
 
-          {profile.address ? (
+          {branch?.address ? (
             <DetailRow icon={<MapPin className="h-4 w-4" />}>
-              {profile.googleMapsUrl ? (
+              {branch.googleMapsUrl ? (
                 <a
-                  href={profile.googleMapsUrl}
+                  href={branch.googleMapsUrl}
                   target="_blank"
                   rel="noreferrer"
                   className="underline decoration-border underline-offset-4 transition hover:text-foreground"
                 >
-                  {profile.address}
+                  {branch.address}
                 </a>
               ) : (
-                <span>{profile.address}</span>
+                <span>{branch.address}</span>
               )}
             </DetailRow>
           ) : null}
