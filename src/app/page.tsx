@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, CreditCard } from "lucide-react";
+import { ArrowUpRight, CreditCard } from "iconoir-react";
 
 const apps = [
   {
