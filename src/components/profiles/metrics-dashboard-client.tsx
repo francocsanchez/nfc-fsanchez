@@ -61,6 +61,12 @@ function SlugPieChart({
   mes,
 }: SlugChartProps) {
   const chartRef = useRef<HTMLDivElement | null>(null);
+  const normalizedSaveContactClicks = Number.isFinite(saveContactClicks)
+    ? saveContactClicks
+    : 0;
+  const normalizedWhatsappClicks = Number.isFinite(whatsappClicks)
+    ? whatsappClicks
+    : 0;
 
   useEffect(() => {
     if (!chartRef.current) {
@@ -103,12 +109,12 @@ function SlugPieChart({
           },
           data: [
             {
-              value: saveContactClicks,
+              value: normalizedSaveContactClicks,
               name: "Guardar contacto",
               itemStyle: { color: "#111111" },
             },
             {
-              value: whatsappClicks,
+              value: normalizedWhatsappClicks,
               name: "WhatsApp",
               itemStyle: { color: "#d4d4d8" },
             },
@@ -129,9 +135,9 @@ function SlugPieChart({
       resizeObserver.disconnect();
       chart.dispose();
     };
-  }, [slug, saveContactClicks, whatsappClicks]);
+  }, [normalizedSaveContactClicks, normalizedWhatsappClicks, slug]);
 
-  const total = saveContactClicks + whatsappClicks;
+  const total = normalizedSaveContactClicks + normalizedWhatsappClicks;
 
   return (
     <article className="rounded-3xl border border-border bg-card p-5">
@@ -155,13 +161,13 @@ function SlugPieChart({
           <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
             Guardar contacto
           </p>
-          <p className="mt-1 text-xl font-medium">{saveContactClicks}</p>
+          <p className="mt-1 text-xl font-medium">{normalizedSaveContactClicks}</p>
         </div>
         <div>
           <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
             WhatsApp
           </p>
-          <p className="mt-1 text-xl font-medium">{whatsappClicks}</p>
+          <p className="mt-1 text-xl font-medium">{normalizedWhatsappClicks}</p>
         </div>
       </div>
     </article>
