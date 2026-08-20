@@ -64,6 +64,7 @@ Superficies principales:
 
 - Framework: `next@16.2.11` con App Router
 - UI: React 19, Tailwind 4, Iconoir para iconografia y componentes compartidos en `src/components`
+- Visualizacion: ECharts para graficos de metricas
 - Datos: MongoDB
 - Auth: Better Auth con email/password y sesiones en MongoDB
 
@@ -114,6 +115,7 @@ Carpetas relevantes:
 - El sitio web e Instagram visibles en landings publicas son globales para todos los perfiles.
 - La direccion visible en la landing publica se resuelve por la sucursal global asignada al perfil.
 - La vista `/credenciales/perfiles/admin` debe priorizar la tabla de perfiles; el catalogo se consulta en dialog y las configuraciones globales se editan aparte.
+- La vista `/credenciales/perfiles/metricas` debe usar graficos pie por slug con filtros por mes y ano, ocupando todo el ancho disponible.
 - El admin debe priorizar claridad operativa, velocidad de uso y mantenimiento sencillo.
 - No asumir paletas, tipografias o estilos de otras marcas o proyectos. Cualquier decision visual nueva debe justificarse dentro de este repositorio.
 
