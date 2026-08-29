@@ -4,16 +4,17 @@ import {
   buildCatalogWorkbookBuffer,
   parseCatalogWorkbookBuffer,
 } from "@/lib/catalog-excel";
-import { getSessionFromHeaders } from "@/lib/auth-session";
+import {
+  createSessionErrorResponse,
+  getSessionResultFromHeaders,
+} from "@/lib/auth-session";
 import { getCatalogSettings, updateCatalogSettings } from "@/lib/catalog";
 
-function createUnauthorizedResponse() {
-  return Response.json({ error: "No autorizado." }, { status: 401 });
-}
-
 export async function GET(request: Request) {
-  if (!(await getSessionFromHeaders(request.headers))) {
-    return createUnauthorizedResponse();
+  const sessionResult = await getSessionResultFromHeaders(request.headers);
+
+  if (sessionResult.status !== "authenticated") {
+    return createSessionErrorResponse(sessionResult);
   }
 
   try {
@@ -40,8 +41,10 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  if (!(await getSessionFromHeaders(request.headers))) {
-    return createUnauthorizedResponse();
+  const sessionResult = await getSessionResultFromHeaders(request.headers);
+
+  if (sessionResult.status !== "authenticated") {
+    return createSessionErrorResponse(sessionResult);
   }
 
   try {

@@ -66,14 +66,14 @@ Superficies principales:
 - UI: React 19, Tailwind 4, Iconoir para iconografia y componentes compartidos en `src/components`
 - Visualizacion: ECharts para graficos de metricas
 - Datos: MongoDB
-- Auth: Better Auth con email/password y sesiones en MongoDB
+- Auth: Auth Central via consulta server-to-server de sesion y roles por aplicacion
 
 Carpetas relevantes:
 
 - `src/app`: paginas, layouts y route handlers
 - `src/components`: UI compartida y clientes interactivos
 - `src/lib`: acceso a datos, auth, esquemas y logica de dominio
-- `scripts`: utilidades de desarrollo y seed de usuario admin
+- `scripts`: utilidades de desarrollo
 
 ## Reglas de implementacion
 
@@ -101,11 +101,11 @@ Carpetas relevantes:
 
 ## Auth y acceso
 
-- Las rutas bajo `/admin` y las APIs administrativas requieren sesion valida.
-- Better Auth ya esta integrado en el codigo actual; no asumir un flujo de auth pendiente.
-- La inicializacion de auth vive en `src/lib/auth.ts`.
-- Las validaciones de sesion compartidas viven en `src/lib/auth-session.ts`.
-- La recuperacion de contrasena se apoya en email/password de Better Auth y envio SMTP.
+- Las rutas bajo `/admin` y las APIs administrativas requieren sesion central valida.
+- La integracion con Auth Central vive en `src/lib/auth.ts`.
+- Las validaciones y redirecciones compartidas viven en `src/lib/auth-session.ts`.
+- Si Auth Central devuelve `401`, la app debe redirigir al login central.
+- Si Auth Central devuelve `403`, la app debe exponer acceso denegado sin crear sesion local.
 
 ## UI
 
@@ -122,9 +122,8 @@ Carpetas relevantes:
 ## Entorno
 
 - MongoDB soporta `DATABASE_MONGO` o la combinacion `MONGODB_URI` + `MONGODB_DB_NAME`.
+- Auth Central requiere `CENTRAL_AUTH_URL`, `CENTRAL_AUTH_PUBLIC_URL` y `CENTRAL_APP_KEY`.
 - La URL publica depende de `NEXT_PUBLIC_APP_URL`.
-- Auth puede usar `BETTER_AUTH_URL` y `BETTER_AUTH_SECRET` segun el entorno.
-- El envio de emails requiere `MAIL_APP_NAME`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM_NAME` y `SMTP_FROM_EMAIL`.
 
 ## Comandos
 
@@ -132,7 +131,6 @@ Carpetas relevantes:
 - `npm run dev:web`
 - `npm run build`
 - `npm run lint`
-- `npm run seed:auth-user`
 
 ## Commit
 Luego de realizar una implementacion de manera correcta, devolver unicamente el comando 

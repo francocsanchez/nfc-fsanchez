@@ -1,52 +1,168 @@
 import "server-only";
 
-import { betterAuth } from "better-auth";
-import { mongodbAdapter } from "better-auth/adapters/mongodb";
-import { nextCookies } from "better-auth/next-js";
+export type CentralSession = {
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    isActive: boolean;
+    isCentralAdmin: boolean;
+  };
+  session: {
+    id: string;
+    expiresAt: string;
+  };
+  access: Array<{
+    appKey: string;
+    role: "admin" | "user" | "viewer";
+  }>;
+};
 
-import { sendPasswordResetEmail } from "@/lib/mailer";
-import { getDatabase, getMongoClient } from "@/lib/mongodb";
-import { getPasswordResetUrl } from "@/lib/public-url";
+export type CentralSessionResult =
+  | {
+      status: "authenticated";
+      session: CentralSession;
+    }
+  | {
+      status: "unauthenticated";
+    }
+  | {
+      status: "forbidden";
+    };
 
-const baseURL = process.env.BETTER_AUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL;
+type CentralAuthConfig = {
+  appKey: string;
+  centralAuthUrl: string;
+  centralAuthPublicUrl: string;
+  appBaseUrl: string;
+};
 
-let authPromise: ReturnType<typeof createAuth> | undefined;
+function getRequiredEnv(name: string) {
+  const value = process.env[name]?.trim();
 
-async function createAuth() {
-  const auth = betterAuth({
-    baseURL,
-    database: mongodbAdapter(await getDatabase(), {
-      client: await getMongoClient(),
-      transaction: false,
-    }),
-    emailAndPassword: {
-      enabled: true,
-      disableSignUp: true,
-      minPasswordLength: 8,
-      revokeSessionsOnPasswordReset: true,
-      async sendResetPassword({ user, token }, request) {
-        const requestOrigin = request ? new URL(request.url).origin : undefined;
-
-        await sendPasswordResetEmail({
-          email: user.email,
-          name: user.name,
-          resetUrl: getPasswordResetUrl(token, baseURL ?? requestOrigin),
-        });
-      },
-    },
-    trustedOrigins: baseURL ? [baseURL] : undefined,
-    plugins: [nextCookies()],
-  });
-
-  if (!auth) {
-    throw new Error("Failed to initialize authentication.");
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
   }
 
-  return auth;
+  return value;
 }
 
-export function getAuth() {
-  authPromise ??= createAuth();
+function normalizeBaseUrl(baseUrl: string) {
+  return baseUrl.replace(/\/+$/, "");
+}
 
-  return authPromise;
+function getCentralAuthConfig(): CentralAuthConfig {
+  return {
+    appKey: getRequiredEnv("CENTRAL_APP_KEY"),
+    centralAuthUrl: normalizeBaseUrl(getRequiredEnv("CENTRAL_AUTH_URL")),
+    centralAuthPublicUrl: normalizeBaseUrl(
+      process.env.CENTRAL_AUTH_PUBLIC_URL?.trim() || getRequiredEnv("CENTRAL_AUTH_URL"),
+    ),
+    appBaseUrl: normalizeBaseUrl(getRequiredEnv("NEXT_PUBLIC_APP_URL")),
+  };
+}
+
+function resolveRequestOrigin(requestHeaders?: Headers) {
+  const forwardedHost = requestHeaders?.get("x-forwarded-host");
+  const host = forwardedHost ?? requestHeaders?.get("host");
+
+  if (!host) {
+    return null;
+  }
+
+  const forwardedProto = requestHeaders?.get("x-forwarded-proto");
+  const protocol = forwardedProto ?? (host.includes("localhost") ? "http" : "https");
+
+  return `${protocol}://${host}`;
+}
+
+function toReturnToUrl(returnTo: string, requestHeaders?: Headers) {
+  if (/^https?:\/\//i.test(returnTo)) {
+    return returnTo;
+  }
+
+  const baseUrl =
+    resolveRequestOrigin(requestHeaders) ?? getCentralAuthConfig().appBaseUrl;
+
+  return new URL(returnTo.startsWith("/") ? returnTo : `/${returnTo}`, baseUrl).toString();
+}
+
+export function hasAppAccess(
+  session: CentralSession,
+  appKey = getCentralAuthConfig().appKey,
+) {
+  return session.access.some((access) => access.appKey === appKey);
+}
+
+export function getAppRole(
+  session: CentralSession,
+  appKey = getCentralAuthConfig().appKey,
+) {
+  return session.access.find((access) => access.appKey === appKey)?.role ?? null;
+}
+
+export function getCentralLoginUrl(
+  returnTo: string,
+  requestHeaders?: Headers,
+) {
+  const { appKey, centralAuthPublicUrl } = getCentralAuthConfig();
+  const loginUrl = new URL("/login", centralAuthPublicUrl);
+
+  loginUrl.searchParams.set("appKey", appKey);
+  loginUrl.searchParams.set("returnTo", toReturnToUrl(returnTo, requestHeaders));
+
+  return loginUrl.toString();
+}
+
+export function getCentralLogoutUrl(
+  returnTo = "/",
+  requestHeaders?: Headers,
+) {
+  const { centralAuthPublicUrl } = getCentralAuthConfig();
+  const logoutUrl = new URL("/logout", centralAuthPublicUrl);
+
+  logoutUrl.searchParams.set("returnTo", toReturnToUrl(returnTo, requestHeaders));
+
+  return logoutUrl.toString();
+}
+
+export async function getCentralSession(
+  requestHeaders: Headers,
+): Promise<CentralSessionResult> {
+  const { appKey, centralAuthUrl } = getCentralAuthConfig();
+  const sessionUrl = new URL("/api/internal/session", centralAuthUrl);
+  const cookie = requestHeaders.get("cookie");
+
+  sessionUrl.searchParams.set("appKey", appKey);
+
+  const response = await fetch(sessionUrl, {
+    method: "GET",
+    headers: cookie ? { cookie } : undefined,
+    cache: "no-store",
+  });
+
+  if (response.status === 401) {
+    return { status: "unauthenticated" };
+  }
+
+  if (response.status === 403) {
+    return { status: "forbidden" };
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      `Central auth session request failed with status ${response.status}.`,
+    );
+  }
+
+  const session = (await response.json()) as CentralSession;
+
+  if (!hasAppAccess(session, appKey)) {
+    return { status: "forbidden" };
+  }
+
+  return {
+    status: "authenticated",
+    session,
+  };
 }

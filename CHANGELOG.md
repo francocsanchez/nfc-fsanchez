@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-29
+
+- Se reemplazo Better Auth por una integracion minima con Auth Central, reenviando la cookie actual al endpoint server-to-server `/api/internal/session` y resolviendo acceso por `CENTRAL_APP_KEY`.
+- Se agrego `CENTRAL_AUTH_PUBLIC_URL` para separar la URL interna de Auth Central usada en server-to-server de la URL publica usada en redirecciones de login y logout.
+- Las rutas protegidas, layouts administrativos y APIs privadas ahora diferencian `401` y `403`, redirigen al login central cuando no hay sesion y muestran `/forbidden` cuando la cuenta no tiene acceso a la app.
+- Se elimino el login con email/password local, el cambio y recuperacion de contrasena propios, el route handler de Better Auth, el seed de usuario admin y las dependencias SMTP/Nodemailer asociadas.
+
 ## 2026-08-20
 
 - Se reemplazo la tabla de `/credenciales/perfiles/metricas` por graficos pie con Apache ECharts, uno por slug, con filtros de mes y ano y layout a ancho completo.

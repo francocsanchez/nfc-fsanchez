@@ -1,22 +1,23 @@
 import { z } from "zod";
 
-import { getSessionFromHeaders } from "@/lib/auth-session";
+import {
+  createSessionErrorResponse,
+  getSessionResultFromHeaders,
+} from "@/lib/auth-session";
 import {
   formatZodError,
   getProfileById,
   updateProfile,
 } from "@/lib/profiles";
 
-function createUnauthorizedResponse() {
-  return Response.json({ error: "No autorizado." }, { status: 401 });
-}
-
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!(await getSessionFromHeaders(request.headers))) {
-    return createUnauthorizedResponse();
+  const sessionResult = await getSessionResultFromHeaders(request.headers);
+
+  if (sessionResult.status !== "authenticated") {
+    return createSessionErrorResponse(sessionResult);
   }
 
   try {
@@ -45,8 +46,10 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!(await getSessionFromHeaders(request.headers))) {
-    return createUnauthorizedResponse();
+  const sessionResult = await getSessionResultFromHeaders(request.headers);
+
+  if (sessionResult.status !== "authenticated") {
+    return createSessionErrorResponse(sessionResult);
   }
 
   try {

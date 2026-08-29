@@ -7,20 +7,16 @@
     "dev:web": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "seed:auth-user": "node scripts/upsert-auth-user.mjs"
+    "lint": "eslint"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
-    "@types/nodemailer": "^8.0.1",
-    "better-auth": "^1.6.24",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "echarts": "^6.1.0",
     "iconoir-react": "^7.12.1",
     "mongodb": "^7.5.0",
     "next": "16.2.11",
-    "nodemailer": "^9.0.5",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "shadcn": "^4.14.0",

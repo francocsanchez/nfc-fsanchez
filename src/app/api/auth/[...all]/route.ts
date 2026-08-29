@@ -1,28 +1,13 @@
-import { toNextJsHandler } from "better-auth/next-js";
-import type { NextRequest } from "next/server";
+const body = {
+  error: "La autenticacion local ya no esta disponible en esta aplicacion.",
+};
 
-import { getAuth } from "@/lib/auth";
-
-export async function GET(request: NextRequest) {
-  const auth = await getAuth();
-
-  if (!auth) {
-    throw new Error("Failed to initialize authentication.");
-  }
-
-  const handler = toNextJsHandler(auth);
-
-  return handler.GET(request);
+function createGoneResponse() {
+  return Response.json(body, { status: 410 });
 }
 
-export async function POST(request: NextRequest) {
-  const auth = await getAuth();
-
-  if (!auth) {
-    throw new Error("Failed to initialize authentication.");
-  }
-
-  const handler = toNextJsHandler(auth);
-
-  return handler.POST(request);
-}
+export const GET = createGoneResponse;
+export const POST = createGoneResponse;
+export const PUT = createGoneResponse;
+export const PATCH = createGoneResponse;
+export const DELETE = createGoneResponse;

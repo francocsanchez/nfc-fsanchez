@@ -1,4 +1,7 @@
-import { getSessionFromHeaders } from "@/lib/auth-session";
+import {
+  createSessionErrorResponse,
+  getSessionResultFromHeaders,
+} from "@/lib/auth-session";
 import {
   clearProfilePhoto,
   getProfilePhotoAssetById,
@@ -10,16 +13,14 @@ import {
   validateProfilePhotoFile,
 } from "@/lib/imagekit";
 
-function createUnauthorizedResponse() {
-  return Response.json({ error: "No autorizado." }, { status: 401 });
-}
-
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!(await getSessionFromHeaders(request.headers))) {
-    return createUnauthorizedResponse();
+  const sessionResult = await getSessionResultFromHeaders(request.headers);
+
+  if (sessionResult.status !== "authenticated") {
+    return createSessionErrorResponse(sessionResult);
   }
 
   try {
@@ -83,8 +84,10 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!(await getSessionFromHeaders(request.headers))) {
-    return createUnauthorizedResponse();
+  const sessionResult = await getSessionResultFromHeaders(request.headers);
+
+  if (sessionResult.status !== "authenticated") {
+    return createSessionErrorResponse(sessionResult);
   }
 
   try {

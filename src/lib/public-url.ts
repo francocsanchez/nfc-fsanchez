@@ -3,7 +3,7 @@ function normalizeBaseUrl(baseUrl: string) {
 }
 
 export function getAppBaseUrl(
-  baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.BETTER_AUTH_URL,
+  baseUrl = process.env.NEXT_PUBLIC_APP_URL,
 ) {
   if (!baseUrl) {
     return "";
@@ -19,17 +19,6 @@ export function getAppBaseUrl(
 export function getPublicProfileUrl(slug: string, baseUrl = process.env.NEXT_PUBLIC_APP_URL) {
   const path = `/credenciales/${slug}`;
 
-  const normalizedBaseUrl = getAppBaseUrl(baseUrl);
-
-  if (!normalizedBaseUrl) {
-    return path;
-  }
-
-  return `${normalizedBaseUrl}${path}`;
-}
-
-export function getPasswordResetUrl(token: string, baseUrl = process.env.NEXT_PUBLIC_APP_URL) {
-  const path = `/recuperar-password/nueva?token=${encodeURIComponent(token)}`;
   const normalizedBaseUrl = getAppBaseUrl(baseUrl);
 
   if (!normalizedBaseUrl) {

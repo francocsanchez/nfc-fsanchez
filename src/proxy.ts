@@ -1,22 +1,22 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { getAuth } from "@/lib/auth";
+import { getCentralLoginUrl, getCentralSession } from "@/lib/auth";
 
 export async function proxy(request: NextRequest) {
-  const auth = await getAuth();
-  const session = await auth.api.getSession({
-    headers: request.headers,
-  });
+  const sessionResult = await getCentralSession(request.headers);
+  const nextPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
 
-  if (!session) {
-    const loginUrl = new URL("/login", request.url);
-    const nextPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
-
-    if (nextPath !== "/admin") {
-      loginUrl.searchParams.set("next", nextPath);
-    }
+  if (sessionResult.status === "unauthenticated") {
+    const loginUrl =
+      nextPath === "/admin"
+        ? getCentralLoginUrl("/credenciales/perfiles/admin", request.headers)
+        : getCentralLoginUrl(nextPath, request.headers);
 
     return NextResponse.redirect(loginUrl);
+  }
+
+  if (sessionResult.status === "forbidden") {
+    return NextResponse.redirect(new URL("/forbidden", request.url));
   }
 
   return NextResponse.next();
