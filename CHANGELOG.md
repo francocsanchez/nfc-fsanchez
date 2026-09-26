@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-09-26
+
+- Se corrigio la reutilizacion del pool de MongoDB en produccion. Las visitas repetidas a credenciales publicas ahora comparten un unico `MongoClient` por proceso, con un limite de conexiones para evitar el agotamiento de recursos.
+
 ## 2026-08-29
 
 - Se reemplazo Better Auth por una integracion minima con Auth Central, reenviando la cookie actual al endpoint server-to-server `/api/internal/session` y resolviendo acceso por `CENTRAL_APP_KEY`.

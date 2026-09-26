@@ -122,6 +122,7 @@ Carpetas relevantes:
 ## Entorno
 
 - MongoDB soporta `DATABASE_MONGO` o la combinacion `MONGODB_URI` + `MONGODB_DB_NAME`.
+- La conexion a MongoDB debe reutilizar un unico pool por proceso tambien en produccion; no crear un `MongoClient` por request publico.
 - Auth Central requiere `CENTRAL_AUTH_URL`, `CENTRAL_AUTH_PUBLIC_URL` y `CENTRAL_APP_KEY`.
 - La URL publica depende de `NEXT_PUBLIC_APP_URL`.
 

@@ -48,11 +48,17 @@ export function getMongoClient(): Promise<MongoClient> {
   const { uri } = getMongoConfig();
 
   const clientPromise =
-    global.__mongoClientPromise__ ?? new MongoClient(uri).connect();
+    global.__mongoClientPromise__ ??
+    new MongoClient(uri, {
+      // A public credential can receive many concurrent scans. Reusing this
+      // process-wide pool prevents opening an unbounded client per request.
+      maxPoolSize: 20,
+      serverSelectionTimeoutMS: 5_000,
+    }).connect();
 
-  if (process.env.NODE_ENV !== "production") {
-    global.__mongoClientPromise__ = clientPromise;
-  }
+  // Keep the connection pool for the lifetime of the process in every
+  // environment. Limiting this to development leaks clients in production.
+  global.__mongoClientPromise__ = clientPromise;
 
   return clientPromise;
 }
