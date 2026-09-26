@@ -124,6 +124,7 @@ Carpetas relevantes:
 - MongoDB soporta `DATABASE_MONGO` o la combinacion `MONGODB_URI` + `MONGODB_DB_NAME`.
 - La conexion a MongoDB debe reutilizar un unico pool por proceso tambien en produccion; no crear un `MongoClient` por request publico.
 - Auth Central requiere `CENTRAL_AUTH_URL`, `CENTRAL_AUTH_PUBLIC_URL` y `CENTRAL_APP_KEY`.
+- `CENTRAL_AUTH_URL` debe ser resolvible desde el contenedor de la app. Para usar el hostname `auth-central`, ambos servicios deben compartir una red Docker y ese nombre o alias debe existir en ella.
 - La URL publica depende de `NEXT_PUBLIC_APP_URL`.
 
 ## Comandos

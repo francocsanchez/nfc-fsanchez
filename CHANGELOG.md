@@ -2,6 +2,8 @@
 
 ## 2026-09-26
 
+- Se agrego una red Docker externa configurable para conectar la app NFC con Auth Central y se documento la configuracion necesaria para resolver `auth-central` entre stacks.
+- Las fallas de conectividad con Auth Central ahora se manejan como indisponibilidad controlada: las paginas privadas muestran `/auth-unavailable` y las APIs administrativas responden `503` en vez de producir un error no controlado de Next.js.
 - Se corrigio la reutilizacion del pool de MongoDB en produccion. Las visitas repetidas a credenciales publicas ahora comparten un unico `MongoClient` por proceso, con un limite de conexiones para evitar el agotamiento de recursos.
 
 ## 2026-08-29

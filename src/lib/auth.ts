@@ -28,6 +28,9 @@ export type CentralSessionResult =
     }
   | {
       status: "forbidden";
+    }
+  | {
+      status: "unavailable";
     };
 
 type CentralAuthConfig = {
@@ -135,11 +138,20 @@ export async function getCentralSession(
 
   sessionUrl.searchParams.set("appKey", appKey);
 
-  const response = await fetch(sessionUrl, {
-    method: "GET",
-    headers: cookie ? { cookie } : undefined,
-    cache: "no-store",
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(sessionUrl, {
+      method: "GET",
+      headers: cookie ? { cookie } : undefined,
+      cache: "no-store",
+      signal: AbortSignal.timeout(5_000),
+    });
+  } catch (error) {
+    console.error("Central auth session request is unavailable", error);
+
+    return { status: "unavailable" };
+  }
 
   if (response.status === 401) {
     return { status: "unauthenticated" };
