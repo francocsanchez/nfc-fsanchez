@@ -19,10 +19,6 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/forbidden", request.url));
   }
 
-  if (sessionResult.status === "unavailable") {
-    return NextResponse.redirect(new URL("/auth-unavailable", request.url));
-  }
-
   return NextResponse.next();
 }
 

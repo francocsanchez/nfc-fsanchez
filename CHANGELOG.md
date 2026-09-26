@@ -2,8 +2,7 @@
 
 ## 2026-09-26
 
-- Se documento que `CENTRAL_AUTH_URL` debe resolver desde la red del contenedor NFC cuando Auth Central se consume por hostname interno.
-- Las fallas de conectividad con Auth Central ahora se manejan como indisponibilidad controlada: las paginas privadas muestran `/auth-unavailable` y las APIs administrativas responden `503` en vez de producir un error no controlado de Next.js.
+- Se revirtio el timeout artificial agregado a la consulta de sesion de Auth Central, restaurando el comportamiento de autenticacion que funcionaba en `f4f52a0`.
 - Se corrigio la reutilizacion del pool de MongoDB en produccion. Las visitas repetidas a credenciales publicas ahora comparten un unico `MongoClient` por proceso, con un limite de conexiones para evitar el agotamiento de recursos.
 
 ## 2026-08-29

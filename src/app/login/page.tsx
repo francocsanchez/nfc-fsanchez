@@ -21,9 +21,5 @@ export default async function LoginPage({
     redirect("/forbidden");
   }
 
-  if (sessionResult.status === "unavailable") {
-    redirect("/auth-unavailable");
-  }
-
   redirect(getCentralLoginUrl(next));
 }

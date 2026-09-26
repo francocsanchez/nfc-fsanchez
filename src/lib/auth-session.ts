@@ -37,13 +37,6 @@ export function createSessionErrorResponse(
     return Response.json({ error: "Acceso denegado." }, { status: 403 });
   }
 
-  if (result.status === "unavailable") {
-    return Response.json(
-      { error: "El servicio de autenticacion no esta disponible." },
-      { status: 503 },
-    );
-  }
-
   return Response.json({ error: "No autorizado." }, { status: 401 });
 }
 
@@ -57,10 +50,6 @@ export async function requireSession(nextPath = "/credenciales/perfiles/admin") 
 
   if (result.status === "forbidden") {
     redirect("/forbidden");
-  }
-
-  if (result.status === "unavailable") {
-    redirect("/auth-unavailable");
   }
 
   return result.session;

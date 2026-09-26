@@ -19,13 +19,6 @@ IMAGEKIT_PRIVATE_KEY=
 IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/<tu_imagekit_id>
 ```
 
-`CENTRAL_AUTH_URL` debe poder resolverse desde el contenedor de NFC. Si usas
-`http://auth-central:3000`, ambos servicios deben compartir una red Docker y Auth
-Central debe tener el nombre o alias `auth-central`. Si estan en stacks o hosts
-distintos, usa una URL privada accesible desde el contenedor, por ejemplo
-`http://192.168.100.31:3000`; no uses un hostname interno que el contenedor no
-pueda resolver.
-
 Comandos:
 
 ```bash
@@ -99,8 +92,6 @@ Detalles del flujo:
 - `CENTRAL_AUTH_PUBLIC_URL` se usa para redirigir al usuario al login/logout central.
 - Si Auth Central responde `401`, el usuario es redirigido a `{CENTRAL_AUTH_URL}/login?appKey=...&returnTo=...`.
 - Si Auth Central responde `403`, la app muestra `/forbidden`.
-- Si Auth Central no es accesible, las rutas internas muestran `/auth-unavailable`
-  y las APIs administrativas responden `503`, sin tumbar el proceso de Next.js.
 - Si Auth Central responde `200`, la app habilita layouts y APIs privadas con la sesion devuelta.
 - El logout redirige a `{CENTRAL_AUTH_PUBLIC_URL}/logout?returnTo={NEXT_PUBLIC_APP_URL}`.
 
