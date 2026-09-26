@@ -7,8 +7,6 @@ services:
     restart: unless-stopped
     ports:
       - "32768:3000"
-    networks:
-      - auth-central-network
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -32,8 +30,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
-
-networks:
-  auth-central-network:
-    external: true
-    name: ${CENTRAL_AUTH_NETWORK:-auth-central_default}

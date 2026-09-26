@@ -20,10 +20,9 @@ IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/<tu_imagekit_id>
 ```
 
 `CENTRAL_AUTH_URL` debe poder resolverse desde el contenedor de NFC. Si usas
-`http://auth-central:3000`, ambos servicios deben compartir la red Docker externa
-`auth-central_default` (o definir `CENTRAL_AUTH_NETWORK` con el nombre correcto) y
-Auth Central debe tener el nombre o alias `auth-central`. Si estan en stacks o
-hosts distintos, usa una URL privada accesible desde el contenedor, por ejemplo
+`http://auth-central:3000`, ambos servicios deben compartir una red Docker y Auth
+Central debe tener el nombre o alias `auth-central`. Si estan en stacks o hosts
+distintos, usa una URL privada accesible desde el contenedor, por ejemplo
 `http://192.168.100.31:3000`; no uses un hostname interno que el contenedor no
 pueda resolver.
 
