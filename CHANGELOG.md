@@ -2,6 +2,8 @@
 
 ## 2026-09-26
 
+- El stack Docker vuelve a unirse declarativamente a la red externa `internal-apps`, preservando la conectividad con Auth Central sin intervencion manual despues de cada despliegue.
+- El pool de MongoDB ahora descarta una conexion inicial fallida, permitiendo que solicitudes publicas posteriores reintenten la conexion en lugar de conservar un rechazo permanente.
 - Se revirtio el timeout artificial agregado a la consulta de sesion de Auth Central, restaurando el comportamiento de autenticacion que funcionaba en `f4f52a0`.
 - Se corrigio la reutilizacion del pool de MongoDB en produccion. Las visitas repetidas a credenciales publicas ahora comparten un unico `MongoClient` por proceso, con un limite de conexiones para evitar el agotamiento de recursos.
 

@@ -47,20 +47,23 @@ function getMongoConfig() {
 export function getMongoClient(): Promise<MongoClient> {
   const { uri } = getMongoConfig();
 
-  const clientPromise =
-    global.__mongoClientPromise__ ??
-    new MongoClient(uri, {
+  if (!global.__mongoClientPromise__) {
+    const client = new MongoClient(uri, {
       // A public credential can receive many concurrent scans. Reusing this
       // process-wide pool prevents opening an unbounded client per request.
       maxPoolSize: 20,
       serverSelectionTimeoutMS: 5_000,
-    }).connect();
+    });
 
-  // Keep the connection pool for the lifetime of the process in every
-  // environment. Limiting this to development leaks clients in production.
-  global.__mongoClientPromise__ = clientPromise;
+    // Keep the pool for the process lifetime in every environment. If the
+    // initial connection fails, clear it so a later public request can retry.
+    global.__mongoClientPromise__ = client.connect().catch((error: unknown) => {
+      global.__mongoClientPromise__ = undefined;
+      throw error;
+    });
+  }
 
-  return clientPromise;
+  return global.__mongoClientPromise__;
 }
 
 export async function getDatabase(): Promise<Db> {

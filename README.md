@@ -31,6 +31,8 @@ npm run lint
 ## Docker
 
 El proyecto se construye con `output: "standalone"` para generar una imagen mas chica y lista para produccion.
+El stack se conecta a la red Docker externa `internal-apps`, donde debe estar
+disponible Auth Central con el alias `auth-central`.
 
 Build local:
 
@@ -76,6 +78,9 @@ IMAGEKIT_PUBLIC_KEY=tu_public_key
 IMAGEKIT_PRIVATE_KEY=tu_private_key
 IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/tu_imagekit_id
 ```
+
+Antes de desplegar, verifica que exista la red externa `internal-apps` y que el
+contenedor de Auth Central este unido a ella con el alias `auth-central`.
 
 ## Auth de admin
 
